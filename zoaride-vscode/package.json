@@ -1,0 +1,79 @@
+{
+    "name": "zoaride-vscode",
+    "displayName": "ゾアライド言語",
+    "description": "ゾアライド言語の構文強調・入力補完などを提供します。",
+    "version": "0.1.0",
+    "author": "vain0x <vainzerox@gmail.com>",
+    "publisher": "vain0x",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/vain0x/zoaride-lang.git"
+    },
+    "homepage": "https://github.com/vain0x/zoaride-lang",
+    "categories": [
+        "Programming Languages"
+    ],
+    "engines": {
+        "vscode": "^1.40.1"
+    },
+    "dependencies": {
+        "vscode-languageclient": "^5.2.1"
+    },
+    "devDependencies": {
+        "@types/node": "^12.12.11",
+        "typescript": "^3.7.2",
+        "vsce": "^1.69.0",
+        "vscode": "^1.1.36",
+        "vscode-languageserver-protocol": "^3.14.1"
+    },
+    "scripts": {
+        "postinstall": "vscode-install",
+        "build": "tsc -b",
+        "watch": "tsc -w",
+        "vsce:package": "vsce package --out zoaride-vscode.vsix"
+    },
+    "main": "out/extension.js",
+    "activationEvents": [
+        "onLanguage:zoaride"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "zoaride",
+                "extensions": [
+                    "zoaride"
+                ],
+                "aliases": [
+                    "ゾアライド言語",
+                    "zoaride-lang"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "zoaride",
+                "scopeName": "source.zoaride",
+                "path": "./syntaxes/zoaride.json"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "ゾアライド言語 設定",
+            "properties": {
+                "zoaride.trace.server": {
+                    "type": "string",
+                    "enum": [
+                        "off",
+                        "messages",
+                        "verbose"
+                    ],
+                    "default": "off",
+                    "description": "[開発者向け] LSP サーバーの通信ログの詳細度",
+                    "scope": "window"
+                }
+            }
+        }
+    }
+}

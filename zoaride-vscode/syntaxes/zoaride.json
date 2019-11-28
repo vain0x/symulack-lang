@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "scopeName": "source.zoaride",
+  "name": "zoaride",
+  "fileTypes": [
+    "zoaride"
+  ],
+  "foldingStartMarker": "\\{|\\{\"",
+  "foldingStopMarker": "\\}|\"\\}",
+  "patterns": [
+    {
+      "include": "#comments"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "comment": "行末コメント",
+          "match": "//.*$",
+          "name": "comment.line.zoaride"
+        }
+      ]
+    }
+  }
+}

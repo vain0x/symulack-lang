@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -eux
+
+npm --version
+
+npm run build
+npm run vsce:package
+code --install-extension 'zoaride-vscode.vsix'
