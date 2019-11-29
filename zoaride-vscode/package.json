@@ -18,6 +18,8 @@
         "vscode": "^1.40.1"
     },
     "dependencies": {
+        "await-notify": "^1.0.1",
+        "vscode-debugadapter": "^1.37.1",
         "vscode-languageclient": "^5.2.1"
     },
     "devDependencies": {
@@ -35,7 +37,8 @@
     },
     "main": "out/extension.js",
     "activationEvents": [
-        "onLanguage:zoaride"
+        "onLanguage:zoaride",
+        "onDebug"
     ],
     "contributes": {
         "languages": [
@@ -74,6 +77,52 @@
                     "scope": "window"
                 }
             }
-        }
+        },
+        "breakpoints": [
+            {
+                "language": "zoaride"
+            }
+        ],
+        "debuggers": [
+            {
+                "type": "zoaride-launch",
+                "label": "ゾアライド デバッグ実行",
+                "adapterExecutableCommand": "zoaride.adapterExecutableCommand",
+                "configurationAttributes": {
+                    "launch": {
+                        "properties": {
+                            "program": {
+                                "type": "string",
+                                "description": "デバッグ実行時に実行されるファイルを指定します。",
+                                "default": "${file}"
+                            },
+                            "trace": {
+                                "type": "boolean",
+                                "description": "[開発者向け] 詳細なログ出力を行います。",
+                                "default": false
+                            }
+                        }
+                    }
+                },
+                "initialConfigurations": [
+                    {
+                        "type": "zoaride-launch",
+                        "request": "launch",
+                        "name": "ゾアライド デバッグ実行"
+                    }
+                ],
+                "configurationSnippets": [
+                    {
+                        "label": "ゾアライド デバッグ実行",
+                        "description": "デバッグ実行を開始します。",
+                        "body": {
+                            "type": "zoaride-launch",
+                            "request": "launch",
+                            "name": "ゾアライド デバッグ実行"
+                        }
+                    }
+                ]
+            }
+        ]
     }
 }

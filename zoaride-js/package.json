@@ -2,7 +2,13 @@
   "name": "zoaride-js",
   "version": "1.0.0",
   "description": "Zoaride is an IDE-oriented programming language",
+  "keywords": [],
+  "author": "vain0x <vainzerox@gmail.com>",
+  "license": "MIT",
   "main": "index.js",
+  "dependencies": {
+    "vscode-debugadapter": "^1.37.1"
+  },
   "devDependencies": {
     "@types/node": "^12.12.14",
     "@typescript-eslint/eslint-plugin": "^2.9.0",
@@ -20,8 +26,5 @@
     "dev:build": "tsc --watch",
     "dev:test": "mocha -r ts-node/register src/test_main.ts --watch",
     "test": "mocha -r ts-node/register src/test_main.ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT"
+  }
 }

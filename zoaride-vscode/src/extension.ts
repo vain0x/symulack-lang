@@ -9,6 +9,7 @@ import {
     LanguageClientOptions,
     ServerOptions,
 } from "vscode-languageclient"
+import { setUpDebugger, tearDownDebugger } from "./ext_debug"
 
 let client: LanguageClient
 
@@ -50,6 +51,8 @@ const startLspClient = (context: ExtensionContext) => {
  * 拡張機能が開始したとき
  */
 export const activate = (context: ExtensionContext) => {
+    setUpDebugger(context)
+
     client = startLspClient(context)
 }
 
@@ -57,6 +60,8 @@ export const activate = (context: ExtensionContext) => {
  * 拡張機能が停止するとき
  */
 export const deactivate = (): Thenable<void> | undefined => {
+    tearDownDebugger()
+
     if (client) {
         return client.stop()
     }

@@ -1,5 +1,6 @@
 out/*.js
 out/*.js.map
+out/zoaride-debug-log.txt
 zoaride-vscode.vsix
 
 
