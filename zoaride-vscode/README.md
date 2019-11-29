@@ -1,4 +1,4 @@
-# Zoaride for Visual Studio Code
+# ZOARIDE for VISUAL STUDIO CODE
 
 ゾアライド言語のための VSCode 拡張機能です。
 
