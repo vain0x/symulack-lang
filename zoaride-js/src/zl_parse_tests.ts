@@ -3,19 +3,17 @@
 import * as assert from "assert"
 import * as fs from "fs"
 import * as path from "path"
-import { ParseError, ParseEvent, RedToken } from "./zl_syntax"
+import { ParseEvent } from "./zl_syntax"
 import { TestSuiteFun } from "./test_types"
 import { parse } from "./zl_parse_main"
 import { promisify } from "util"
 import { tokenize } from "./zl_tokenize_main"
 
-const printParseResult = (tokens: RedToken[], events: ParseEvent[], errors: ParseError[]) => {
-    const SPACES = "                                             "
+const printParseResult = (events: ParseEvent[]) => {
+    const SPACES = "                "
 
     let output = ""
-    let index = 0
     let depth = 0
-    const stack = []
 
     for (const event of events) {
         switch (event.kind) {
@@ -23,11 +21,9 @@ const printParseResult = (tokens: RedToken[], events: ParseEvent[], errors: Pars
                 output += SPACES.slice(0, depth * 2)
                 depth++
 
-                output += "START "
+                output += "START("
                 output += event.nodeKind
-                output += "\r\n"
-
-                stack.push(event.nodeKind)
+                output += ")\r\n"
                 continue
             }
             case "P_END_NODE": {
@@ -35,20 +31,25 @@ const printParseResult = (tokens: RedToken[], events: ParseEvent[], errors: Pars
                 depth--
 
                 output += SPACES.slice(0, depth * 2)
-                output += "END "
-                output += stack.pop()
-                output += "\r\n"
+                output += "END("
+                output += event.nodeKind
+                output += ")\r\n"
                 continue
             }
             case "P_TOKEN": {
-                for (let i = 0; i < event.count; i++) {
-                    output += SPACES.slice(0, depth * 2)
-                    output += tokens[index].kind
-                    output += " "
-                    output += JSON.stringify(tokens[index].text)
-                    output += "\r\n"
-                    index++
-                }
+                output += SPACES.slice(0, depth * 2)
+                output += "TOKEN("
+                output += event.token.kind
+                output += ") "
+                output += JSON.stringify(event.token.text)
+                output += "\r\n"
+                continue
+            }
+            case "P_ERROR": {
+                output += SPACES.slice(0, depth * 2)
+                output += "ERROR("
+                output += event.errorKind
+                output += ")\r\n"
                 continue
             }
             default:
@@ -56,24 +57,7 @@ const printParseResult = (tokens: RedToken[], events: ParseEvent[], errors: Pars
         }
     }
 
-    assert.equal(index, tokens.length - 1)
     assert.equal(depth, 0)
-
-    // FIXME: みやすく表示する
-    for (const error of errors) {
-        output += "\r\nERROR: "
-        output += error.kind
-        output += " ("
-        output += error.range.start.line
-        output += ":"
-        output += error.range.start.character
-        output += "..."
-        output += error.range.end.line
-        output += ":"
-        output += error.range.end.character
-        output += ")\r\n"
-    }
-
     return output
 }
 
@@ -95,9 +79,9 @@ export const zlParseSnapshotTest: TestSuiteFun = ({ test }) => {
                 const content = await promisify(fs.readFile)(filePath)
                 const text = content.toString()
 
-                const { tokens, errors: tokenizeErrors } = tokenize(text)
-                const { events, errors } = parse(tokens, tokenizeErrors)
-                const output = printParseResult(tokens, events, errors)
+                const tokens = tokenize(text)
+                const events = parse(tokens)
+                const output = printParseResult(events)
 
                 await promisify(fs.writeFile)(outputPath, output)
                 ok(true)

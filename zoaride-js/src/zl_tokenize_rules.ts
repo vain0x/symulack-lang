@@ -56,7 +56,7 @@ const tokenizeError = (t: TokenizeContext) => {
     }
 
     if (t.isDirty()) {
-        t.commitError("PE_INVALID_CHAR")
+        t.commit("T_ERROR")
     }
 }
 

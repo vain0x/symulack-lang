@@ -3,8 +3,6 @@
 import * as assert from "assert"
 import {
     GreenToken,
-    ParseError,
-    ParseErrorKind,
     TokenKind,
 } from "./zl_syntax"
 
@@ -33,11 +31,6 @@ export class TokenizeContext {
      * `this.lastIndexP までのソースコードを字句解析して得られたトークンのリスト
      */
     private tokens: GreenToken[] = []
-
-    /**
-     * `this.lastIndex` までのソースコードを字句解析して得られたエラーのリスト
-     */
-    private errors: ParseError[] = []
 
     public constructor(text: string) {
         this.text = text
@@ -134,29 +127,6 @@ export class TokenizeContext {
     }
 
     /**
-     * エラーを起こしているトークンをコミットする。
-     */
-    public commitError(kind: ParseErrorKind) {
-        this.errors.push({
-            kind,
-            // FIXME: 位置情報を持つ
-            range: {
-                start: {
-                    line: 0,
-                    character: 0,
-                },
-                end: {
-                    line: 0,
-                    character: 0,
-                },
-            },
-        })
-        this.commit("T_ERROR")
-
-        this.assertInvariants()
-    }
-
-    /**
      * 字句解析を終了する。
      */
     public finish() {
@@ -166,9 +136,6 @@ export class TokenizeContext {
         // 末尾に EOF トークンを自動でつける。(構文解析のため)
         this.commit("T_EOF")
 
-        return {
-            tokens: this.tokens,
-            errors: this.errors,
-        }
+        return this.tokens
     }
 }

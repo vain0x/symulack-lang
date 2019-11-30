@@ -4,8 +4,6 @@ import {
 } from "vscode-languageserver-types"
 import {
     RedToken,
-    TokenKind,
-    tokenKindIsTrivial,
 } from "./zl_syntax"
 import { tokenizeAll } from "./zl_tokenize_rules"
 
@@ -66,7 +64,7 @@ const calculateTokenRanges = (tokens: RedToken[]) => {
  * 字句解析を行う。
  */
 export const tokenize = (text: string) => {
-    const { tokens, errors } = tokenizeAll(text)
+    const tokens = tokenizeAll(text)
 
     // 赤トークンを生成する。
     const redTokens: RedToken[] = tokens.map(greenToken => ({
@@ -81,8 +79,5 @@ export const tokenize = (text: string) => {
     calculateTokenRanges(redTokens)
     // calculateLineStartFlags(redTokens)
 
-    return {
-        tokens: redTokens,
-        errors,
-    }
+    return redTokens
 }

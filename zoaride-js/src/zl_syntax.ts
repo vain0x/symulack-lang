@@ -5,42 +5,6 @@ import {
 } from "vscode-languageserver-types"
 
 /**
- * 字句解析・構文解析中のエラーの種類
- */
-export type ParseErrorKind =
-    // 解釈できない文字がある
-    | "PE_INVALID_CHAR"
-    // ソースコードが途中で終わっている (`1 +` とか)
-    | "PE_UNEXPECTED_EOF"
-    | "PE_EXPECTED_EXPR"
-
-/**
- * 字句解析・構文解析のエラー
- */
-export interface ParseError {
-    /**
-     * エラーの種類
-     */
-    kind: ParseErrorKind
-
-    /**
-     * エラーの範囲
-     */
-    range: Range
-}
-
-export type SyntaxErrorKind =
-    | ParseErrorKind
-
-/**
- * 構文エラー
- */
-export interface SyntaxError {
-    kind: SyntaxErrorKind
-    range: Range
-}
-
-/**
  * トークンの種類
  */
 export type TokenKind =
@@ -134,7 +98,43 @@ export type RedElement =
     | {
         kind: "L_NODE"
         node: RedNode
-     }
+    }
+
+/**
+ * 字句解析・構文解析中のエラーの種類
+ */
+export type ParseErrorKind =
+    // 解釈できない文字がある。
+    | "PE_INVALID_CHAR"
+    // ソースコードが途中で終わっている。(`1 +` など)
+    | "PE_UNEXPECTED_EOF"
+    | "PE_EXPECTED_EXPR"
+
+/**
+ * 字句解析・構文解析のエラー
+ */
+export interface ParseError {
+    /**
+     * エラーの種類
+     */
+    kind: ParseErrorKind
+
+    /**
+     * エラーの範囲
+     */
+    range: Range
+}
+
+export interface ParseEventTree {
+    event: ParseEvent | null
+    prev: ParseEventTree | null
+    next: ParseEventTree | null
+}
+
+export interface ParseNode {
+    startEvent: ParseEvent
+    tree: ParseEventTree
+}
 
 /**
  * 構文解析の結果として生成されるイベント
@@ -146,15 +146,20 @@ export type ParseEvent =
     }
     | {
         kind: "P_END_NODE"
+        nodeKind: NodeKind
     }
     | {
         kind: "P_TOKEN"
-        count: number
+        token: GreenToken
+    }
+    | {
+        kind: "P_ERROR"
+        errorKind: ParseErrorKind
     }
 
 /**
  * trivial な (重要でない) 種類のトークンか？
  */
-export const tokenKindIsTrivial = (tokenKind: TokenKind) =>
+export const tokenIsTrivial = (tokenKind: TokenKind) =>
     tokenKind === "T_ERROR"
     || tokenKind === "T_SPACE"
