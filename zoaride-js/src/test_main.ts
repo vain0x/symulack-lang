@@ -1,5 +1,6 @@
 import * as assert from "assert"
 import { TestCaseContext, TestSuiteContext } from "./test_types"
+import { dapParseTest } from "./dap_parse"
 import { helloTest } from "./hello"
 import { lspParseTest } from "./lsp_parse"
 import { zlParseSnapshotTest } from "./zl_parse_tests"
@@ -9,6 +10,7 @@ const mocha = require("mocha")
 // ここにテストを追加する。
 const TEST_SUITE_FUNS = {
     helloTest,
+    dapParseTest,
     lspParseTest,
     zlParseMainTest: zlParseSnapshotTest,
 }
