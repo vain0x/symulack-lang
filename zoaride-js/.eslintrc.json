@@ -25,6 +25,7 @@
             "warn",
             "always-multiline"
         ],
+        "no-constant-condition": "off",
         "no-extra-semi": "warn",
         "no-unused-vars": "off",
         "sort-imports": "warn"

@@ -2,6 +2,7 @@ import * as assert from "assert"
 import { TestCaseContext, TestSuiteContext } from "./test_types"
 import { helloTest } from "./hello"
 import { lspParseTest } from "./lsp_parse"
+import { zlParseSnapshotTest } from "./zl_parse_tests"
 
 const mocha = require("mocha")
 
@@ -9,6 +10,7 @@ const mocha = require("mocha")
 const TEST_SUITE_FUNS = {
     helloTest,
     lspParseTest,
+    zlParseMainTest: zlParseSnapshotTest,
 }
 
 const testCaseContext: TestCaseContext = {

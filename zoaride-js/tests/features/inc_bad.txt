@@ -1,0 +1,7 @@
+START N_ROOT
+  T_PLUS_PLUS "++"
+  T_IDENT "n"
+  T_SPACE "\r\n"
+END N_ROOT
+
+ERROR: PE_EXPECTED_EXPR (0:0...0:2)
