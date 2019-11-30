@@ -1,0 +1,37 @@
+{
+  "name": "zoaride-playground",
+  "version": "1.0.0",
+  "description": "The zoaride playground",
+  "main": "index.js",
+  "keywords": [],
+  "author": "vain0x <vainzerox@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "^16.9.13",
+    "@types/react-dom": "^16.9.4",
+    "monaco-editor": "^0.18.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-monaco-editor": "^0.32.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.9.0",
+    "@typescript-eslint/parser": "^2.9.0",
+    "css-loader": "^3.2.0",
+    "eslint": "^6.7.1",
+    "html-webpack-plugin": "^3.2.0",
+    "npm-run-all": "^4.1.5",
+    "source-map-loader": "^0.2.4",
+    "style-loader": "^1.0.1",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.2",
+    "vscode-languageserver-protocol": "^3.14.1",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0"
+  },
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev:serve": "webpack-dev-server src --watch"
+  }
+}
