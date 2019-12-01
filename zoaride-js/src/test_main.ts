@@ -3,6 +3,7 @@ import { TestCaseContext, TestSuiteContext } from "./test_types"
 import { dapParseTest } from "./dap_parse"
 import { helloTest } from "./hello"
 import { lspParseTest } from "./lsp_parse"
+import { vmQueueTest } from "./vm_queue"
 import { zlParseSnapshotTest } from "./zl_parse_tests"
 
 const mocha = require("mocha")
@@ -12,7 +13,8 @@ const TEST_SUITE_FUNS = {
     helloTest,
     dapParseTest,
     lspParseTest,
-    zlParseMainTest: zlParseSnapshotTest,
+    vmQueueTest,
+    zlParseSnapshotTest,
 }
 
 const testCaseContext: TestCaseContext = {
