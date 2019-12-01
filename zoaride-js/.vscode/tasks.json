@@ -12,10 +12,26 @@
             "problemMatcher": [
                 "$tsc"
             ],
+            "group": "build"
+        },
+        {
+            "label": "zoaride-js:test",
+            "type": "shell",
+            "command": "npm",
+            "args": [
+                "run",
+                "test"
+            ],
+            "problemMatcher": [
+                "$tsc"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "dependsOn": [
+                "zoaride-js:build"
+            ]
         },
         {
             "label": "zoaride-vscode:build",
