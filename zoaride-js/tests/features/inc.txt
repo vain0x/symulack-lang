@@ -4,6 +4,6 @@ START(N_ROOT)
       TOKEN(T_IDENT) "n"
     END(N_NAME)
     TOKEN(T_PLUS_PLUS) "++"
-    TOKEN(T_SPACE) "\r\n"
+    TOKEN(T_SPACE) "\n"
   END(N_INC_STMT)
 END(N_ROOT)

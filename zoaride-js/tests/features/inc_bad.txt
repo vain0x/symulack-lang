@@ -4,5 +4,5 @@ START(N_ROOT)
   TOKEN(T_PLUS_PLUS) "++"
   TOKEN(T_SPACE) " "
   TOKEN(T_IDENT) "n"
-  TOKEN(T_SPACE) "\r\n"
+  TOKEN(T_SPACE) "\n"
 END(N_ROOT)
