@@ -62,19 +62,14 @@ export class VmQueue {
                 return msg
             }
 
-            if (!msg) {
-                return await new Promise<VmMsg>(resolve => {
-                    this.listeners[id].next = resolve
-                })
-            }
-
-            return msg
+            return await new Promise<VmMsg>(resolve => {
+                this.listeners[id].next = resolve
+            })
         }
 
         return poll
     }
 }
-
 
 export const vmQueueTest: TestSuiteFun = ({ test }) => {
     const nextTick = () => new Promise(resolve => setTimeout(resolve, 1))
