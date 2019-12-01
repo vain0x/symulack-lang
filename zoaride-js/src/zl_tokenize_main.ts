@@ -76,8 +76,8 @@ export const tokenize = (text: string) => {
         // atLineStart: false,
     }))
 
-    calculateTokenRanges(redTokens)
+    // calculateTokenRanges(redTokens)
     // calculateLineStartFlags(redTokens)
 
-    return redTokens
+    return tokens
 }

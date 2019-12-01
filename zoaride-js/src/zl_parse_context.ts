@@ -1,9 +1,9 @@
 import * as assert from "assert"
 import {
     GreenNode,
+    GreenToken,
     NodeKind,
     ParseErrorKind,
-    RedToken,
     tokenIsTrivial,
 } from "./zl_syntax"
 
@@ -14,14 +14,14 @@ export class ParseContext {
     /**
      * 字句解析で構築したトークンリスト
      */
-    private tokens: RedToken[]
+    private tokens: GreenToken[]
 
     /**
      * トークン列上の現在位置
      */
     private index: number = 0
 
-    public constructor(tokens: RedToken[]) {
+    public constructor(tokens: GreenToken[]) {
         assert.ok(tokens.length >= 1)
         assert.equal(tokens[tokens.length - 1].kind, "T_EOF")
 
