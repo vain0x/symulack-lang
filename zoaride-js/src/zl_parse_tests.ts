@@ -86,7 +86,7 @@ export const zlParseSnapshotTest: TestSuiteFun = ({ test }) => {
 
         for (const fileName of fs.readdirSync(dirPath)) {
             const filePath = path.join(dirPath, fileName)
-            const outputPath = path.join(dirPath, fileName.replace(".zoaride", ".txt"))
+            const outputPath = path.join(dirPath, fileName.replace(".zoaride", "_parse.txt"))
 
             if (path.extname(fileName) !== ".zoaride") {
                 continue

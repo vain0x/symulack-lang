@@ -3,10 +3,13 @@
 import {
     GreenElement,
     GreenNode,
+    ParseError,
     RedElement,
 } from "./zl_syntax"
 import { Position, Range } from "vscode-languageserver-types"
 import { TextCursor } from "./util_text_cursor"
+import { arrayFilterMap } from "./util_array"
+import { TestSuiteFun } from "./test_types"
 
 const POSITION_ZERO: Position = {
     line: 0,
@@ -69,4 +72,31 @@ const recalculateRanges = (red: RedElement, cursor: TextCursor) => {
 
     const end = cursor.currentPosition()
     red.range = { start, end }
+}
+
+const asToken = (element: RedElement): RedElement | null =>
+    element.green.kind === "L_TOKEN"
+        ? element
+        : null
+
+export const redElementToChildTokens = (element: RedElement): RedElement[] =>
+    arrayFilterMap(element.children, asToken)
+
+export const redElementToErrors = (element: RedElement): ParseError[] => {
+    const go = (element: RedElement): void => {
+        if (element.green.kind === "L_ERROR") {
+            errors.push({
+                kind: element.green.errorKind,
+                range: element.range,
+            })
+        }
+
+        for (const child of element.children) {
+            go(child)
+        }
+    }
+
+    const errors = [] as ParseError[]
+    go(element)
+    return errors
 }

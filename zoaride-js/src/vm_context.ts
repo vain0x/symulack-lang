@@ -1,38 +1,35 @@
-// バーチャルマシンの状態管理
+import { EXIT_FAILURE, ExitError } from "./vm_error"
+import { RedElement } from "./zl_syntax"
+import { VmStep } from "./vm_step"
+import { VmValue } from "./vm_value"
+import { writeTrace } from "./util_trace"
 
-type VmValue =
-    | {
-        kind: "V_NUMBER"
-        value: number
-    }
-
-type OnExitFn = (exitCode: number) => void
-
+/**
+ * バーチャルマシンの状態を管理するもの
+ */
 export class VmContext {
-    private sourcePath: string
-
     private globals = new Map<string, VmValue>()
 
-    private onExit: OnExitFn
-
-    public constructor(sourcePath: string, onExit: OnExitFn) {
-        this.sourcePath = sourcePath
-        this.onExit = onExit
-
-        this.globals.set("n", {
-            kind: "V_NUMBER",
-            value: 1,
-        })
+    public constructor(
+        public readonly step: VmStep,
+    ) {
     }
 
-    public start() {
-        // setTimeout(() => {
-        //     this.end()
-        // }, 3000)
+    public terminate(exitCode: number): never {
+        throw new ExitError(exitCode)
     }
 
-    public terminate() {
-        this.onExit(0)
+    public fatal(msg: string, data?: unknown): never {
+        writeTrace("FATAL: " + msg, data)
+        throw new ExitError(EXIT_FAILURE)
+    }
+
+    /**
+     * ステップ実行中なら実行を中断して、次にステップインや再開ボタンが押されるまで待つ。
+     */
+    public async debug(element: RedElement): Promise<void> {
+        const currentLine = element.range.start.line
+        return this.step.next(currentLine)
     }
 
     public getGlobals() {

@@ -92,21 +92,24 @@ export class VmStep {
     public async start() {
         const next = this.queue.listen()
 
-        while (next) {
+        while (true) {
             const msg = await next()
             switch (msg.kind) {
-                case "VM_CONTINUE": {
+                case "VM_CONTINUE":
                     this.continue()
                     continue
-                }
-                case "VM_PAUSE": {
-                    await this.pause()
+
+                case "VM_PAUSE":
+                    this.pause()
                     continue
-                }
-                case "VM_STEP_IN": {
-                    await this.stepIn()
+
+                case "VM_STEP_IN":
+                    this.stepIn()
                     continue
-                }
+
+                case "VM_TERMINATE":
+                    break
+
                 default:
                     continue
             }
