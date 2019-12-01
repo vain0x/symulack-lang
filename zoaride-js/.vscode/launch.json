@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "extensionHost",
+            "request": "launch",
+            "name": "Launch Extension",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}/../zoaride-vscode"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/../zoaride-vscode/out/**/*.js"
+            ],
+            "preLaunchTask": "zoaride-vscode:build"
+        }
+    ],
+    "compounds": []
+}

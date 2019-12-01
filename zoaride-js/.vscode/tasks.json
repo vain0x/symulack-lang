@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "npm:build",
+            "label": "zoaride-js:build",
             "type": "shell",
             "command": "npm",
             "args": [
@@ -16,6 +16,25 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "zoaride-vscode:build",
+            "type": "shell",
+            "command": "npm",
+            "args": [
+                "run",
+                "build"
+            ],
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "group": "build",
+            "options": {
+                "cwd": "../zoaride-vscode"
+            },
+            "dependsOn": [
+                "zoaride-js:build"
+            ]
         }
     ]
 }
