@@ -3,6 +3,7 @@ import { TestCaseContext, TestSuiteContext } from "./test_types"
 import { dapParseTest } from "./dap_parse"
 import { helloTest } from "./hello"
 import { lspParseTest } from "./lsp_parse"
+import { utilArrayTest } from "./util_array"
 import { vmQueueTest } from "./vm_queue"
 import { vmStepTest } from "./vm_step"
 import { zlParseSnapshotTest } from "./zl_parse_tests"
@@ -14,6 +15,7 @@ const TEST_SUITE_FUNS = {
     helloTest,
     dapParseTest,
     lspParseTest,
+    utilArrayTest,
     vmQueueTest,
     vmStepTest,
     zlParseSnapshotTest,
