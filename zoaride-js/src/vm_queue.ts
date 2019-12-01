@@ -12,7 +12,7 @@ export type VmMsg =
         line: number
     }
     | {
-        kind: "VM_CONITNUE"
+        kind: "VM_CONTINUE"
     }
     | {
         kind: "VM_PAUSE"
@@ -74,7 +74,7 @@ export class VmQueue {
 export const vmQueueTest: TestSuiteFun = ({ test }) => {
     const nextTick = () => new Promise(resolve => setTimeout(resolve, 1))
 
-    test("メッセージを受け取れる", async ({ is }) => {
+    test("メッセージを受け取る", async ({ is }) => {
         const queue = new VmQueue()
         const events = queue.listen()
 
