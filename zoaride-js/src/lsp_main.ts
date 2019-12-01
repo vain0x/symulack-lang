@@ -1,27 +1,20 @@
 import { LspServerSender, ZoarideLspServer } from "./lsp_server"
+import { serializeNotify, serializeRequest, serializeResponse } from "./lsp_serialize"
+import { TextDecoder } from "util"
 import { parseLspMessage } from "./lsp_parse"
-import { serializeLspMessage } from "./lsp_serialize"
 
-const sendLspMessage = (obj: any) => {
-    console.error(serializeLspMessage(obj))
-    process.stdout.write(serializeLspMessage(obj))
-}
+const decoder = new TextDecoder()
 
-const sendRequest = (id: number, method: string, params: any) => {
-    sendLspMessage({ id, method, params })
-}
+const sendMessage = (data: Uint8Array) => {
+    // デバッグ用
+    console.error(decoder.decode(data))
 
-const sendResponse = (id: number, result: any) => {
-    sendLspMessage({ id, result })
-}
-
-const sendNotify = (method: string, params: any) => {
-    sendLspMessage({ method, params })
+    process.stdout.write(data)
 }
 
 const lspServerSender: LspServerSender = {
     publishDiagnostics: params => {
-        sendNotify("textDocument/publishDiagnostics", params)
+        sendMessage(serializeNotify("textDocument/publishDiagnostics", params))
     },
 }
 
@@ -47,7 +40,7 @@ const listen = (server: ZoarideLspServer) => {
         switch (method) {
             case "initialize": {
                 const result = server.initialize(params)
-                sendResponse(id, result)
+                sendMessage(serializeResponse(id, result))
                 return
             }
             case "initialized": {
@@ -60,7 +53,7 @@ const listen = (server: ZoarideLspServer) => {
             }
             case "shutown": {
                 server.shutdown()
-                sendResponse(id, null)
+                sendMessage(serializeResponse(id, null))
                 return
             }
             case "textDocument/didOpen": {
@@ -76,7 +69,7 @@ const listen = (server: ZoarideLspServer) => {
                 return
             }
             default: {
-                console.error("WARN: unknown method " + method)
+                console.error("WARN: 不明なメッセージ " + method)
                 return
             }
         }
