@@ -5,12 +5,12 @@
             "label": "npm:build",
             "type": "shell",
             "command": "npm",
-            "problemMatcher": [
-                "$tsc"
-            ],
             "args": [
                 "run",
                 "build"
+            ],
+            "problemMatcher": [
+                "$tsc"
             ],
             "group": {
                 "kind": "build",

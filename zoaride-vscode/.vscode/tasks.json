@@ -18,7 +18,29 @@
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "dependsOn": [
+                "zoaride-js:build"
+            ]
+        },
+        {
+            "label": "zoaride-js:build",
+            "type": "shell",
+            "command": "npm",
+            "args": [
+                "run",
+                "build"
+            ],
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "presentation": {
+                "reveal": "silent"
+            },
+            "options": {
+                "cwd": "../zoaride-js"
+            },
+            "group": "build"
         }
     ]
 }
