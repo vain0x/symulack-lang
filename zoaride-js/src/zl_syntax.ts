@@ -79,12 +79,16 @@ export interface RedNode extends GreenNode {
  */
 export type GreenElement =
     | {
-        type: "L_TOKEN"
+        kind: "L_TOKEN"
         token: GreenToken
     }
     | {
-        type: "L_NODE"
+        kind: "L_NODE"
         node: GreenNode
+    }
+    | {
+        kind: "L_ERROR"
+        errorKind: ParseErrorKind
     }
 
 /**
@@ -98,6 +102,10 @@ export type RedElement =
     | {
         kind: "L_NODE"
         node: RedNode
+    }
+    | {
+        kind: "L_ERROR"
+        errorKind: ParseErrorKind
     }
 
 /**
@@ -124,38 +132,6 @@ export interface ParseError {
      */
     range: Range
 }
-
-export interface ParseEventTree {
-    event: ParseEvent | null
-    prev: ParseEventTree | null
-    next: ParseEventTree | null
-}
-
-export interface ParseNode {
-    startEvent: ParseEvent
-    tree: ParseEventTree
-}
-
-/**
- * 構文解析の結果として生成されるイベント
- */
-export type ParseEvent =
-    | {
-        kind: "P_START_NODE"
-        nodeKind: NodeKind
-    }
-    | {
-        kind: "P_END_NODE"
-        nodeKind: NodeKind
-    }
-    | {
-        kind: "P_TOKEN"
-        token: GreenToken
-    }
-    | {
-        kind: "P_ERROR"
-        errorKind: ParseErrorKind
-    }
 
 /**
  * trivial な (重要でない) 種類のトークンか？

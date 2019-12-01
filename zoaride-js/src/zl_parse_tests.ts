@@ -3,59 +3,76 @@
 import * as assert from "assert"
 import * as fs from "fs"
 import * as path from "path"
-import { ParseEvent } from "./zl_syntax"
+import { GreenElement, GreenNode, GreenToken } from "./zl_syntax"
 import { TestSuiteFun } from "./test_types"
 import { parse } from "./zl_parse_main"
 import { promisify } from "util"
 import { tokenize } from "./zl_tokenize_main"
 
-const printParseResult = (events: ParseEvent[]) => {
+/**
+ * 構文解析の結果をテキストする。
+ */
+const printParseResult = (root: GreenNode) => {
     const SPACES = "                "
 
     let output = ""
     let depth = 0
 
-    for (const event of events) {
-        switch (event.kind) {
-            case "P_START_NODE": {
-                output += SPACES.slice(0, depth * 2)
-                depth++
+    const goToken = (token: GreenToken) => {
+        output += SPACES.slice(0, depth * 2)
+        output += "TOKEN("
+        output += token.kind
+        output += ") "
+        output += JSON.stringify(token.text)
+        output += "\r\n"
+    }
 
-                output += "START("
-                output += event.nodeKind
-                output += ")\r\n"
-                continue
-            }
-            case "P_END_NODE": {
-                assert.ok(depth >= 1)
-                depth--
+    const goNode = (node: GreenNode) => {
+        // START
+        output += SPACES.slice(0, depth * 2)
+        output += "START("
+        output += node.kind
+        output += ")\r\n"
+        depth++
 
-                output += SPACES.slice(0, depth * 2)
-                output += "END("
-                output += event.nodeKind
-                output += ")\r\n"
-                continue
-            }
-            case "P_TOKEN": {
-                output += SPACES.slice(0, depth * 2)
-                output += "TOKEN("
-                output += event.token.kind
-                output += ") "
-                output += JSON.stringify(event.token.text)
-                output += "\r\n"
-                continue
-            }
-            case "P_ERROR": {
+        // children
+        for (const child of node.children) {
+            goElement(child)
+        }
+
+        // END
+        assert.ok(depth >= 1)
+        depth--
+
+        output += SPACES.slice(0, depth * 2)
+        output += "END("
+        output += node.kind
+        output += ")\r\n"
+    }
+
+    const goElement = (element: GreenElement) => {
+        switch (element.kind) {
+            case "L_TOKEN":
+                goToken(element.token)
+                return
+
+            case "L_NODE":
+                goNode(element.node)
+                return
+
+            case "L_ERROR":
                 output += SPACES.slice(0, depth * 2)
                 output += "ERROR("
-                output += event.errorKind
+                output += element.errorKind
                 output += ")\r\n"
-                continue
-            }
+                return
+
             default:
                 throw new Error("unreachable")
         }
     }
+
+    goNode(root)
 
     assert.equal(depth, 0)
     return output

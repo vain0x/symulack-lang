@@ -1,79 +1,11 @@
 import * as assert from "assert"
 import {
-    GreenToken,
+    GreenNode,
     NodeKind,
     ParseErrorKind,
-    ParseEvent,
-    ParseEventTree,
-    ParseNode,
     RedToken,
     tokenIsTrivial,
 } from "./zl_syntax"
-
-const eventNewStartNode = (): ParseEvent => ({
-    kind: "P_START_NODE",
-    nodeKind: "N_ROOT",
-})
-
-const eventNewEndNode = (nodeKind: NodeKind): ParseEvent => ({
-    kind: "P_END_NODE",
-    nodeKind,
-})
-
-const eventNewToken = (token: GreenToken): ParseEvent => ({
-    kind: "P_TOKEN",
-    token,
-})
-
-const eventNewError = (errorKind: ParseErrorKind): ParseEvent => ({
-    kind: "P_ERROR",
-    errorKind,
-})
-
-const nodeInsertEventPrev = (node: ParseNode, event: ParseEvent) => {
-    node.tree = {
-        event,
-        prev: null,
-        next: node.tree,
-    }
-}
-
-const nodeInsertEventNext = (node: ParseNode, event: ParseEvent) => {
-    node.tree = {
-        event,
-        prev: node.tree,
-        next: null,
-    }
-}
-
-const nodeInsertTreeNext = (node: ParseNode, next: ParseEventTree) => {
-    node.tree = {
-        event: null,
-        prev: node.tree,
-        next,
-    }
-}
-
-const flatten = (node: ParseNode) => {
-    const events: ParseEvent[] = []
-
-    const go = (tree: ParseEventTree): void => {
-        if (tree.prev !== null) {
-            go(tree.prev)
-        }
-
-        if (tree.event !== null) {
-            events.push(tree.event)
-        }
-
-        if (tree.next !== null) {
-            go(tree.next)
-        }
-    }
-
-    go(node.tree)
-    return events
-}
 
 /**
  * 構文解析中の状態を管理するもの
@@ -122,7 +54,7 @@ export class ParseContext {
     /**
      * 指定された数のトークンを読み飛ばす。
      */
-    public bumpMany(node: ParseNode, count: number) {
+    public bumpMany(node: GreenNode, count: number) {
         assert.ok(count >= 0)
         assert.ok(this.index + count < this.tokens.length)
 
@@ -134,15 +66,17 @@ export class ParseContext {
     /**
      * 次のトークンを読み飛ばす。
      */
-    public bump(node: ParseNode) {
+    public bump(node: GreenNode) {
         assert.ok(this.index + 1 < this.tokens.length)
 
         while (true) {
-            nodeInsertEventNext(node, eventNewToken(this.tokens[this.index]))
+            node.children.push({
+                kind: "L_TOKEN",
+                token: this.tokens[this.index],
+            })
             this.index++
 
             // trivial なトークンを無視する。
-            // FIXME: この方針だと2トークン以上の先読みがやりづらい。
             if (tokenIsTrivial(this.next())) {
                 if (this.next() === "T_ERROR") {
                     this.attachError(node, "PE_INVALID_CHAR")
@@ -156,59 +90,46 @@ export class ParseContext {
         this.assertInvariants()
     }
 
-    public startNode(): ParseNode {
-        const startEvent = eventNewStartNode()
-
+    public startNode(): GreenNode {
         return {
-            startEvent,
-            tree: {
-                event: startEvent,
-                prev: null,
-                next: null,
-            },
+            kind: "N_ROOT",
+            children: [],
         }
     }
 
-    public startBefore(childNode: ParseNode): ParseNode {
-        const startEvent = eventNewStartNode()
-
-        nodeInsertEventPrev(childNode, startEvent)
-
+    public startBefore(childNode: GreenNode): GreenNode {
         return {
-            startEvent,
-            tree: {
-                event: null,
-                prev: childNode.tree,
-                next: null,
-            },
+            kind: "N_ROOT",
+            children: [
+                {
+                    kind: "L_NODE",
+                    node: childNode,
+                },
+            ],
         }
     }
 
-    public endNode(node: ParseNode, nodeKind: NodeKind) {
-        // 開始イベントの nodeKind を設定する。
-        assert.equal(node.startEvent.kind, "P_START_NODE")
-        if (node.startEvent.kind === "P_START_NODE") {
-            assert.equal(node.startEvent.nodeKind, "N_ROOT")
-
-            node.startEvent.nodeKind = nodeKind
-        }
-
-        nodeInsertEventNext(node, eventNewEndNode(nodeKind))
+    public endNode(node: GreenNode, nodeKind: NodeKind) {
+        assert.equal(node.kind, "N_ROOT")
+        node.kind = nodeKind
         return node
     }
 
-    public attach(parentNode: ParseNode, childNode: ParseNode) {
-        nodeInsertTreeNext(parentNode, childNode.tree)
-
-        // 使用不可 (デバッグ用)
-        childNode.tree = null!
+    public attach(parentNode: GreenNode, childNode: GreenNode) {
+        parentNode.children.push({
+            kind: "L_NODE",
+            node: childNode,
+        })
     }
 
-    public attachError(node: ParseNode, errorKind: ParseErrorKind) {
-        nodeInsertEventNext(node, eventNewError(errorKind))
+    public attachError(node: GreenNode, errorKind: ParseErrorKind) {
+        node.children.push({
+            kind: "L_ERROR",
+            errorKind,
+        })
     }
 
-    public finish(root: ParseNode): ParseEvent[] {
-        return flatten(root)
+    public finish(root: GreenNode): GreenNode {
+        return root
     }
 }

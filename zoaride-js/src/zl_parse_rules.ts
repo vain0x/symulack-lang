@@ -1,5 +1,5 @@
 import * as assert from "assert"
-import { ParseNode, TokenKind } from "./zl_syntax"
+import { GreenNode, TokenKind } from "./zl_syntax"
 import { ParseContext } from "./zl_parse_context"
 
 const tokenIsAtomFirst = (t: TokenKind) =>
@@ -8,7 +8,7 @@ const tokenIsAtomFirst = (t: TokenKind) =>
 const tokenIsStmtFirst = (t: TokenKind) =>
     tokenIsAtomFirst(t)
 
-const parseAtom = (p: ParseContext): ParseNode => {
+const parseAtom = (p: ParseContext): GreenNode => {
     assert.ok(tokenIsAtomFirst(p.next()))
 
     switch (p.next()) {
@@ -18,11 +18,11 @@ const parseAtom = (p: ParseContext): ParseNode => {
             return p.endNode(node, "N_NAME")
         }
         default:
-            throw new Error("到達不能")
+            throw new Error("unreachable")
     }
 }
 
-const parseStmt = (p: ParseContext) => {
+const parseStmt = (p: ParseContext): GreenNode => {
     assert.ok(tokenIsStmtFirst(p.next()))
 
     const atom = parseAtom(p)
@@ -36,7 +36,7 @@ const parseStmt = (p: ParseContext) => {
     return atom
 }
 
-export const parseRoot = (p: ParseContext) => {
+export const parseRoot = (p: ParseContext): GreenNode => {
     const node = p.startNode()
 
     if (!tokenIsStmtFirst(p.next())) {
