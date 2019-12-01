@@ -64,15 +64,6 @@ export interface GreenNode {
 }
 
 /**
- * 構文木のノード (赤)
- */
-export interface RedNode extends GreenNode {
-    kind: NodeKind
-    redParent: RedNode | null
-    redChildren: RedElement[]
-}
-
-/**
  * 構文要素 (緑)
  *
  * 構文要素は、トークンまたはノード。
@@ -93,20 +84,37 @@ export type GreenElement =
 
 /**
  * 構文要素 (赤)
+ *
+ * 構文要素 (緑) に加えて、親子関係や位置情報を持つ。
  */
-export type RedElement =
-    | {
-        kind: "L_TOKEN"
-        token: RedToken
-    }
-    | {
-        kind: "L_NODE"
-        node: RedNode
-    }
-    | {
-        kind: "L_ERROR"
-        errorKind: ParseErrorKind
-    }
+export interface RedElement {
+    /**
+     * 基になる構文要素 (緑)
+     */
+    green: GreenElement
+
+    /**
+     * 子要素のリスト
+     */
+    children: RedElement[]
+
+    /**
+     * ソースコード上の範囲
+     */
+    range: Range
+
+    /**
+     * 親要素
+     *
+     * ルートノードなら null。
+     */
+    parent: RedElement | null
+
+    /**
+     * この要素が親の何番目の子要素か？
+     */
+    siblingnIndex: number
+}
 
 /**
  * 字句解析・構文解析中のエラーの種類
