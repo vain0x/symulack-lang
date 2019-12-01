@@ -1,5 +1,6 @@
 import { LspServerSender, ZoarideLspServer } from "./lsp_server"
-import { serializeNotify, serializeRequest, serializeResponse } from "./lsp_serialize"
+import { enableTrace, writeTrace } from "./util_trace"
+import { serializeNotify, serializeResponse } from "./lsp_serialize"
 import { TextDecoder } from "util"
 import { parseLspMessage } from "./lsp_parse"
 
@@ -69,7 +70,7 @@ const listen = (server: ZoarideLspServer) => {
                 return
             }
             default: {
-                console.error("WARN: 不明なメッセージ " + method)
+                writeTrace("不明なメッセージ", method)
                 return
             }
         }
@@ -77,6 +78,8 @@ const listen = (server: ZoarideLspServer) => {
 }
 
 const lspMain = () => {
+    enableTrace("lsp")
+
     listen(new ZoarideLspServer(lspServerSender))
 }
 

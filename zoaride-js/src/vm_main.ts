@@ -1,4 +1,4 @@
-import { enableTrace, writeTrace } from "./vm_trace"
+import { enableTrace, writeTrace } from "./util_trace"
 import { VmContext } from "./vm_context"
 import { VmDebugServer } from "./vm_debug"
 
@@ -15,7 +15,7 @@ const deactivate = () => {
 }
 
 const vmMain = () => {
-    enableTrace(process.cwd())
+    enableTrace("vm")
 
     writeTrace("launching", {
         argv: process.argv.slice(2),

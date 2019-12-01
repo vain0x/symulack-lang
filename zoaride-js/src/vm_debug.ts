@@ -2,7 +2,7 @@
 
 import { Server, createServer } from "net"
 import { VmContext } from "./vm_context"
-import { writeTrace } from "./vm_trace"
+import { writeTrace } from "./util_trace"
 
 export class VmDebugServer {
     private port: number

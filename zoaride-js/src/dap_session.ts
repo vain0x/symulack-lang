@@ -4,15 +4,15 @@
 import * as path from "path"
 import { ChildProcess, spawn } from "child_process"
 import {
+    DebugSession,
     InitializedEvent,
-    LoggingDebugSession,
     OutputEvent,
     StoppedEvent,
     TerminatedEvent,
     Thread,
 } from "vscode-debugadapter"
 import { Socket, connect } from "net"
-import { enableTrace, getTraceFilePath, writeTrace } from "./dap_trace"
+import { enableTrace, writeTrace } from "./util_trace"
 import { DebugProtocol } from "vscode-debugprotocol"
 import { promisify } from "util"
 
@@ -49,7 +49,7 @@ const THREAD_ID = 1
 
 const GLOBALS_REFERENCE = 1
 
-export class ZoarideDebugSession extends LoggingDebugSession {
+export class ZoarideDebugSession extends DebugSession {
     /**
      * デバッグ実行のために起動したランタイムのプロセス
      */
@@ -63,14 +63,14 @@ export class ZoarideDebugSession extends LoggingDebugSession {
     private program: string | null = null
 
     constructor() {
-        super(getTraceFilePath())
+        super()
 
-        writeTrace("----------------------")
+        enableTrace("dap")
+
         writeTrace("New Session", {
             cwd: process.cwd(),
             args: process.argv,
         })
-        writeTrace("----------------------")
     }
 
     /**
@@ -89,8 +89,8 @@ export class ZoarideDebugSession extends LoggingDebugSession {
     }
 
     private async _doLaunch(args: LaunchRequestArguments): Promise<[boolean, string]> {
-        if (args && args.trace && args.outDir) {
-            enableTrace(args.outDir)
+        if (args && args.trace) {
+            enableTrace("dap")
         }
 
         writeTrace("launch", args)
