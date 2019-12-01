@@ -1,4 +1,5 @@
 // DAP メッセージ文字列の解析
+// LSP と同じ
 
 import * as assert from "assert"
 import { TextDecoder, TextEncoder } from "util"
@@ -38,7 +39,7 @@ const findByte = (data: Uint8Array, startIndex: number, theByte: number) => {
 
 /**
  * クライアントから受信したメッセージを
- * LSP メッセージとしてパースする。
+ * DAP メッセージとしてパースする。
  */
 export const parseDapMessage = (data: Uint8Array): DapMessageParseResult => {
     let index = 0

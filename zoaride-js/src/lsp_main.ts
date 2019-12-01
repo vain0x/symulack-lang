@@ -35,13 +35,12 @@ const listen = (server: ZoarideLspServer) => {
     process.stdin.on("data", (data: Buffer) => {
         buffer = Buffer.concat([buffer, data])
 
-        const result = parseLspMessage(buffer)
-        if (!result) {
+        const { msg, rest } = parseLspMessage(buffer)
+        buffer = rest
+
+        if (!msg) {
             return
         }
-
-        const { msg, rest } = result
-        buffer = rest
 
         const { method, id, params } = msg
 
@@ -61,7 +60,7 @@ const listen = (server: ZoarideLspServer) => {
             }
             case "shutown": {
                 server.shutdown()
-                sendResponse(id, result)
+                sendResponse(id, null)
                 return
             }
             case "textDocument/didOpen": {
