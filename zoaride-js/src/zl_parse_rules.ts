@@ -39,14 +39,15 @@ const parseStmt = (p: ParseContext): GreenNode => {
 export const parseRoot = (p: ParseContext): GreenNode => {
     const node = p.startNode()
 
-    if (!tokenIsStmtFirst(p.next())) {
-        p.attachError(node, "PE_EXPECTED_EXPR")
-    } else {
+    while (!p.atEof()) {
+        if (!tokenIsStmtFirst(p.next())) {
+            p.bump(node)
+            p.attachError(node, "PE_EXPECTED_EXPR")
+            continue
+        }
+
         p.attach(node, parseStmt(p))
     }
 
-    while (!p.atEof()) {
-        p.bump(node)
-    }
     return p.endNode(node, "N_ROOT")
 }

@@ -3,14 +3,16 @@
 import * as assert from "assert"
 import * as fs from "fs"
 import * as path from "path"
+import { Ast, astGen } from "./zl_ast"
 import { GreenElement, GreenNode, GreenToken } from "./zl_syntax"
 import { TestSuiteFun } from "./test_types"
 import { parse } from "./zl_parse_main"
 import { promisify } from "util"
+import { redElementNewRoot } from "./zl_syntax_red"
 import { tokenize } from "./zl_tokenize_main"
 
 /**
- * 構文解析の結果をテキストする。
+ * 構文解析の結果をテキストにする。
  */
 const printParseResult = (root: GreenNode) => {
     const SPACES = "                "
@@ -78,6 +80,24 @@ const printParseResult = (root: GreenNode) => {
     return output
 }
 
+const printAstResult = (ast: Ast) => {
+    // const go = (ast: any): any => {
+    //     let tree = {} as any
+    //     for (const [key, value] of ast) {
+    //         if (key === "red") {
+    //             return false
+    //         }
+    //     }
+    // }
+
+    // const tree = ast
+
+    const replacer = (key: string, value: unknown) => {
+        return key !== "red" ? value : undefined
+    }
+    return JSON.stringify(ast, replacer, 2)
+}
+
 export const zlParseSnapshotTest: TestSuiteFun = ({ test }) => {
     const testsDir = path.join(__dirname, "../tests")
 
@@ -86,7 +106,8 @@ export const zlParseSnapshotTest: TestSuiteFun = ({ test }) => {
 
         for (const fileName of fs.readdirSync(dirPath)) {
             const filePath = path.join(dirPath, fileName)
-            const outputPath = path.join(dirPath, fileName.replace(".zoaride", ".txt"))
+            const parseOutputPath = path.join(dirPath, fileName.replace(".zoaride", "_parse.txt"))
+            const astOutputPath = path.join(dirPath, fileName.replace(".zoaride", "_ast.txt"))
 
             if (path.extname(fileName) !== ".zoaride") {
                 continue
@@ -96,11 +117,20 @@ export const zlParseSnapshotTest: TestSuiteFun = ({ test }) => {
                 const content = await promisify(fs.readFile)(filePath)
                 const text = content.toString()
 
+                // 構文解析
                 const tokens = tokenize(text)
-                const events = parse(tokens)
-                const output = printParseResult(events)
+                const greenRoot = parse(tokens)
+                const parseOutput = printParseResult(greenRoot)
 
-                await promisify(fs.writeFile)(outputPath, output)
+                await promisify(fs.writeFile)(parseOutputPath, parseOutput)
+
+                // AST 生成
+                const redRoot = redElementNewRoot(greenRoot)
+                const ast = astGen(redRoot)
+                const astOutput = printAstResult(ast)
+
+                await promisify(fs.writeFile)(astOutputPath, astOutput)
+
                 ok(true)
             })
         }

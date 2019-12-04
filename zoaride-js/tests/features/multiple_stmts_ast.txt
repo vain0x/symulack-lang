@@ -1,0 +1,19 @@
+{
+  "kind": "A_SEMI",
+  "children": [
+    {
+      "kind": "A_INC_STMT",
+      "left": {
+        "kind": "A_NAME",
+        "ident": "n"
+      }
+    },
+    {
+      "kind": "A_INC_STMT",
+      "left": {
+        "kind": "A_NAME",
+        "ident": "n"
+      }
+    }
+  ]
+}
