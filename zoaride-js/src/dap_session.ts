@@ -4,6 +4,7 @@
 import * as path from "path"
 import { ChildProcess, spawn } from "child_process"
 import {
+    ContinuedEvent,
     DebugSession,
     InitializedEvent,
     OutputEvent,
@@ -61,6 +62,8 @@ export class ZoarideDebugSession extends DebugSession {
     private connection: Socket | null = null
 
     private program: string | null = null
+
+    private currentLine: number = 0
 
     constructor() {
         super()
@@ -169,10 +172,32 @@ export class ZoarideDebugSession extends DebugSession {
                 const text = data.toString().trim()
                 writeTrace("from vm: " + text)
 
-                this.sendEvent(new OutputEvent("output"))
-                this.sendEvent(new StoppedEvent("entry", THREAD_ID))
+                if (text === "terminated") {
+                    this.sendEvent(new TerminatedEvent())
+                    return
+                }
+
+                if (text === "continued") {
+                    this.sendEvent(new ContinuedEvent(THREAD_ID))
+                    return
+                }
+
+                if (text.startsWith("stopped:")) {
+                    const line = +text.slice("stopped:".length)
+                    if (!Number.isSafeInteger(line)) {
+                        writeTrace("bad protocol")
+                        return
+                    }
+
+                    this.currentLine = line
+                    this.sendEvent(new StoppedEvent("step", THREAD_ID))
+                    return
+                }
             })
         }
+
+        // stop on entry
+        this.sendEvent(new StoppedEvent("entry", THREAD_ID))
     }
 
     public threadsRequest(response: DebugProtocol.ThreadsResponse) {
@@ -186,7 +211,6 @@ export class ZoarideDebugSession extends DebugSession {
                 },
             ],
         }
-        response.success = true
 
         this.sendResponse(response)
     }
@@ -203,12 +227,11 @@ export class ZoarideDebugSession extends DebugSession {
                     source: this.program !== null ? {
                         path: this.program,
                     } : undefined,
-                    line: 1,
+                    line: this.currentLine + 1,
                     column: 1,
                 },
             ],
         }
-        response.success = true
 
         this.sendResponse(response)
     }
@@ -225,7 +248,6 @@ export class ZoarideDebugSession extends DebugSession {
                 },
             ],
         }
-        response.success = true
 
         this.sendResponse(response)
     }
@@ -253,28 +275,83 @@ export class ZoarideDebugSession extends DebugSession {
                     },
                 ],
             }
-            response.success = true
             this.sendResponse(response)
         })
 
         this.connection.write("variables")
     }
 
-    public pauseRequest(response: DebugProtocol.PauseResponse, args: DebugProtocol.PauseArguments) {
-        writeTrace("pause")
+    public continueRequest(response: DebugProtocol.ContinueResponse, _args: DebugProtocol.ContinueArguments) {
+        writeTrace("continue")
 
         if (!this.connection) {
+            response.success = false
             this.sendResponse(response)
             return
         }
 
+        response.body = {}
+
         this.connection.once("data", () => {
-            response.success = true
+            this.sendResponse(response)
+            return
+        })
+
+        this.connection.write("continue\r\n")
+    }
+
+    public pauseRequest(response: DebugProtocol.PauseResponse, _args: DebugProtocol.PauseArguments) {
+        writeTrace("pause")
+
+        if (!this.connection) {
+            response.success = false
+            this.sendResponse(response)
+            return
+        }
+
+
+        this.connection.once("data", () => {
             this.sendResponse(response)
             return
         })
 
         this.connection.write("pause\r\n")
+    }
+
+    public nextRequest(response: DebugProtocol.NextResponse, _args: DebugProtocol.NextArguments) {
+        writeTrace("next")
+
+        if (!this.connection) {
+            response.success = false
+            this.sendResponse(response)
+            return
+        }
+
+
+        this.connection.once("data", () => {
+            this.sendResponse(response)
+            return
+        })
+
+        this.connection.write("stepIn\r\n")
+    }
+
+    public stepInRequest(response: DebugProtocol.StepInResponse, _args: DebugProtocol.StepInArguments) {
+        writeTrace("stepIn")
+
+        if (!this.connection) {
+            response.success = false
+            this.sendResponse(response)
+            return
+        }
+
+
+        this.connection.once("data", () => {
+            this.sendResponse(response)
+            return
+        })
+
+        this.connection.write("stepIn\r\n")
     }
 
     /**

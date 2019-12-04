@@ -37,7 +37,11 @@ const serializeData = (data: unknown) => {
         return data
     }
 
-    return JSON.stringify(data, undefined, 2)
+    try {
+        return JSON.stringify(data, undefined, 2)
+    } catch (_err) {
+        return String(data)
+    }
 }
 
 const buildMessage = (msg: string, data: unknown) => {

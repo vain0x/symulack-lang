@@ -25,26 +25,28 @@ export type VmMsg =
         output: string
     }
 
-type ResolveFun = () => void
+type ResolveMsgFun = (msg: VmMsg) => void
 
 export class VmQueue {
     private readonly allMsg: VmMsg[] = []
 
     private readonly listeners: {
         queue: VmMsg[],
-        next: ResolveFun | null,
+        resolveMsgFun: ResolveMsgFun | null,
     }[] = []
 
     public emit(msg: VmMsg) {
         this.allMsg.push(msg)
 
         for (const listener of this.listeners) {
-            listener.queue.push(msg)
-
-            const next = listener.next
-            if (next) {
-                next()
+            const resolveMsgFun = listener.resolveMsgFun
+            if (resolveMsgFun) {
+                listener.resolveMsgFun = null
+                resolveMsgFun(msg)
+                continue
             }
+
+            listener.queue.push(msg)
         }
     }
 
@@ -53,7 +55,7 @@ export class VmQueue {
 
         this.listeners.push({
             queue: this.allMsg.slice(),
-            next: null,
+            resolveMsgFun: null,
         })
 
         const poll = async (): Promise<VmMsg> => {
@@ -63,7 +65,7 @@ export class VmQueue {
             }
 
             return await new Promise<VmMsg>(resolve => {
-                this.listeners[id].next = resolve
+                this.listeners[id].resolveMsgFun = resolve
             })
         }
 
