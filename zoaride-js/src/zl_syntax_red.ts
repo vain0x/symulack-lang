@@ -9,7 +9,6 @@ import {
 import { Position, Range } from "vscode-languageserver-types"
 import { TextCursor } from "./util_text_cursor"
 import { arrayFilterMap } from "./util_array"
-import { TestSuiteFun } from "./test_types"
 
 const POSITION_ZERO: Position = {
     line: 0,
@@ -96,7 +95,7 @@ export const redElementToErrors = (element: RedElement): ParseError[] => {
         }
     }
 
-    const errors = [] as ParseError[]
+    const errors: ParseError[] = []
     go(element)
     return errors
 }

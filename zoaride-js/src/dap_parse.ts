@@ -43,7 +43,7 @@ const findByte = (data: Uint8Array, startIndex: number, theByte: number) => {
  */
 export const parseDapMessage = (data: Uint8Array): DapMessageParseResult => {
     let index = 0
-    let contentLength = null as number | null
+    let contentLength: number | null = null
     let hasBody = false
 
     while (index < data.length) {

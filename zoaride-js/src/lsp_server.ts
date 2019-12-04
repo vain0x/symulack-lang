@@ -1,3 +1,5 @@
+// LSP サーバーの主要部分
+// コンパイラが提供するソースコード解析 API をラップして LSP サーバーが提供すべき API 実装する。
 
 import {
     Diagnostic,
@@ -26,6 +28,9 @@ export class ZoarideLspServer implements ZoarideLspServer {
         this.sender = sender
     }
 
+    /**
+     * ソースコードのエラーや警告を報告する。
+     */
     private validateDocument(uri: string) {
         const text = this.documents.get(uri)
         if (text === undefined) {
@@ -75,16 +80,27 @@ export class ZoarideLspServer implements ZoarideLspServer {
         // サーバー開始時に何かする。
     }
 
+    /**
+     * LSP クライアントが終了しようとしているときに呼ばれる。
+     *
+     * まだ LSP サーバーのプロセスは停止させない。
+     */
     public shutdown(): void {
         this.exitCode = 0
 
         // サーバー終了前に何かする。
     }
 
+    /**
+     * LSP サーバーを停止させる。
+     */
     public exit(): void {
         process.exit(this.exitCode)
     }
 
+    /**
+     * LSP クライアントでファイルが開かれたとき
+     */
     public textDocumentDidOpen(params: DidOpenTextDocumentParams): void {
         const uri = params.textDocument.uri
         const text = params.textDocument.text
@@ -93,6 +109,9 @@ export class ZoarideLspServer implements ZoarideLspServer {
         this.validateDocument(uri)
     }
 
+    /**
+     * LSP クライアントで開かれているファイルが変更されたとき
+     */
     public textDocumentDidChange(params: DidChangeTextDocumentParams): void {
         const uri = params.textDocument.uri
 
@@ -104,6 +123,9 @@ export class ZoarideLspServer implements ZoarideLspServer {
         this.validateDocument(uri)
     }
 
+    /**
+     * LSP クライアントで開かれていたファイルが閉じられたとき
+     */
     public textDocumentDidClose(params: DidCloseTextDocumentParams): void {
         const uri = params.textDocument.uri
 

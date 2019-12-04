@@ -1,3 +1,5 @@
+// 構文解析の状態管理
+
 import * as assert from "assert"
 import {
     GreenNode,
@@ -109,6 +111,9 @@ export class ParseContext {
         }
     }
 
+    /**
+     * 新しいノードを作る。
+     */
     public startNode(): GreenNode {
         return {
             kind: "N_ROOT",
@@ -116,6 +121,12 @@ export class ParseContext {
         }
     }
 
+    /**
+     * 他のノードの親になるノードを作る。
+     *
+     * 例えば `i + 1` をパースするとき、`i` のノードが完成した後に、
+     * その親となる `+` のノードを作り始める。こういうときに使う。
+     */
     public startBefore(childNode: GreenNode): GreenNode {
         return {
             kind: "N_ROOT",
@@ -128,6 +139,9 @@ export class ParseContext {
         }
     }
 
+    /**
+     * ルートノードを作る。
+     */
     public startRoot(): GreenNode {
         assert.equal(this.index, 0)
 
@@ -143,6 +157,9 @@ export class ParseContext {
         return node
     }
 
+    /**
+     * 他のノードを子ノードとして追加する。
+     */
     public attach(parentNode: GreenNode, childNode: GreenNode) {
         parentNode.children.push({
             kind: "L_NODE",
@@ -150,6 +167,9 @@ export class ParseContext {
         })
     }
 
+    /**
+     * 構文エラーを子ノードとして追加する。
+     */
     public attachError(node: GreenNode, errorKind: ParseErrorKind) {
         node.children.push({
             kind: "L_ERROR",
@@ -157,6 +177,9 @@ export class ParseContext {
         })
     }
 
+    /**
+     * 構文解析の終了時に呼ばれる。
+     */
     public finish(root: GreenNode): GreenNode {
         assert.equal(this.index, this.tokens.length - 1)
         return root

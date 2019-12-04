@@ -1,3 +1,5 @@
+// ステップ実行機能
+
 import { TestSuiteFun } from "./test_types"
 import { VmQueue } from "./vm_queue"
 

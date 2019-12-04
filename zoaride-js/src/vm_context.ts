@@ -1,3 +1,5 @@
+// バーチャルマシンの状態管理
+
 import { EXIT_FAILURE, ExitError } from "./vm_error"
 import { RedElement } from "./zl_syntax"
 import { VmStep } from "./vm_step"

@@ -1,6 +1,5 @@
 // 抽象構文木 (AST)
 
-import * as assert from "assert"
 import { NodeKind, RedElement } from "./zl_syntax"
 import { arrayFilterMap, arrayFirst } from "./util_array"
 
@@ -24,11 +23,21 @@ export type Ast =
         red: RedElement
     }
 
+/**
+ * 式とみなせるノードか？
+ */
 const nodeIsExpr = (kind: NodeKind) =>
     kind === "N_NAME"
 
+/**
+ * 文とみなせるノードか？
+ */
 const nodeIsStmt = (kind: NodeKind) =>
     kind === "N_INC_STMT"
+
+// -----------------------------------------------
+// RedElement のヘルパー関数
+// -----------------------------------------------
 
 const asIdent = (element: RedElement): RedElement | null =>
     element.green.kind === "L_TOKEN" && element.green.token.kind === "T_IDENT"
@@ -45,14 +54,16 @@ const asStmt = (element: RedElement): RedElement | null =>
         ? element
         : null
 
-const redElementToChildExprs = (element: RedElement): RedElement[] =>
+const toChildExprs = (element: RedElement): RedElement[] =>
     arrayFilterMap(element.children, asExpr)
 
-const redElementToChildStmts = (element: RedElement): RedElement[] =>
+const toChildStmts = (element: RedElement): RedElement[] =>
     arrayFilterMap(element.children, asStmt)
 
-const asTokenText = (element: RedElement | null): string | null =>
-    element && element.green.kind === "L_TOKEN" ? element.green.token.text : null
+const toTokenText = (element: RedElement | null): string | null =>
+    element && element.green.kind === "L_TOKEN"
+        ? element.green.token.text
+        : null
 
 // -----------------------------------------------
 // AST 構築
@@ -60,17 +71,17 @@ const asTokenText = (element: RedElement | null): string | null =>
 // 構文木から情報を抽出して AST を構築する。
 // -----------------------------------------------
 
+/**
+ * ノードから式を表す AST を構築する。
+ */
 const genExpr = (element: RedElement | null): Ast | null => {
-    if (!element || element.green.kind !== "L_NODE") {
+    if (!element || element.green.kind !== "L_NODE" || !nodeIsExpr(element.green.node.kind)) {
         return null
     }
 
     switch (element.green.node.kind) {
         case "N_NAME": {
-            const ident = asTokenText(arrayFirst(arrayFilterMap(element.children, asIdent)))
-            if (ident == null) {
-                return null
-            }
+            const ident = toTokenText(arrayFirst(arrayFilterMap(element.children, asIdent)))
 
             return {
                 kind: "A_NAME",
@@ -79,22 +90,21 @@ const genExpr = (element: RedElement | null): Ast | null => {
             }
         }
         default:
-            assert.ok(!nodeIsExpr(element.green.node.kind))
-            return null
+            throw new Error("unreachable")
     }
 }
 
+/**
+ * ノードから文を表す AST を構築する。
+ */
 const genStmt = (element: RedElement | null): Ast | null => {
-    if (!element || element.green.kind !== "L_NODE") {
+    if (!element || element.green.kind !== "L_NODE" || !nodeIsStmt(element.green.node.kind)) {
         return null
     }
 
     switch (element.green.node.kind) {
         case "N_INC_STMT": {
-            const left = genExpr(arrayFirst(redElementToChildExprs(element)))
-            if (left === null) {
-                return null
-            }
+            const left = genExpr(arrayFirst(toChildExprs(element)))
 
             return {
                 kind: "A_INC_STMT",
@@ -103,8 +113,7 @@ const genStmt = (element: RedElement | null): Ast | null => {
             }
         }
         default:
-            assert.ok(!nodeIsStmt(element.green.node.kind))
-            return null
+            throw new Error("unreachable")
     }
 }
 
@@ -112,9 +121,11 @@ const genStmt = (element: RedElement | null): Ast | null => {
  * 構文木から AST を生成する。
  */
 export const astGen = (element: RedElement): Ast => {
-    assert.equal(element.green.kind === "L_NODE" && element.green.node.kind, "N_ROOT")
+    if (element.green.kind !== "L_NODE" || element.green.node.kind != "N_ROOT") {
+        throw new Error("not root")
+    }
 
-    const children = arrayFilterMap(redElementToChildStmts(element), genStmt)
+    const children = arrayFilterMap(toChildStmts(element), genStmt)
     return {
         kind: "A_SEMI",
         children,

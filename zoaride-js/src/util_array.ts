@@ -17,9 +17,15 @@ export const arrayReplicate = <T>(length: number, value: T): T[] => {
     return array
 }
 
+/**
+ * 配列の最初の要素を取得する。
+ */
 export const arrayFirst = <T>(array: T[]): T | null =>
     array.length >= 1 ? array[0] : null
 
+/**
+ * 配列の各要素に関数を適用して、null|undefined を除いた結果からなる配列を作る。
+ */
 export const arrayFilterMap = <T, U>(array: T[], f: (x: T) => U | null | undefined): U[] => {
     const output: U[] = []
 
@@ -38,6 +44,7 @@ export const utilArrayTest: TestSuiteFun = ({ describe, test }) => {
         test("empty", ({ is }) => {
             is(arrayFirst([]), null)
         })
+
         test("nonempty", ({ is }) => {
             is(arrayFirst([true, false]), true)
         })
@@ -45,7 +52,8 @@ export const utilArrayTest: TestSuiteFun = ({ describe, test }) => {
 
     describe("arrayFilterMap", () => {
         test("works", ({ is }) => {
-            is(arrayFilterMap([1, 4, 1, 4, 2], x => x % 2 === 0 ? x / 2 : null), [2, 2, 1])
+            const half = (x: number) => x % 2 === 0 ? x / 2 : null
+            is(arrayFilterMap([1, 4, 1, 4, 2], half), [2, 2, 1])
         })
     })
 }

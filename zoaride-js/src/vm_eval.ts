@@ -1,4 +1,4 @@
-// プログラムの動作の定義
+// 評価器 (プログラムの動作の定義)
 
 import { VALUE_ZERO, VmValue } from "./vm_value"
 import { Ast } from "./zl_ast"

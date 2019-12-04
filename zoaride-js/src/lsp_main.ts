@@ -1,3 +1,5 @@
+// LSP サーバーのエントリーポイント
+
 import { LspServerSender, ZoarideLspServer } from "./lsp_server"
 import { enableTrace, writeTrace } from "./util_trace"
 import { serializeNotify, serializeResponse } from "./lsp_serialize"

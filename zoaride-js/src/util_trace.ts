@@ -3,7 +3,7 @@
 import * as fs from "fs"
 import * as path from "path"
 
-let currentName = null as string | null
+let currentName: string | null = null
 
 const getCurrentFilePath = () => {
     if (!currentName) {

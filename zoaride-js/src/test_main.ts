@@ -1,3 +1,6 @@
+// テストのエントリーポイント
+// 特定のテストランナーに依存しないため、テスト関数の登録などを手動で行う。
+
 import * as assert from "assert"
 import { TestCaseContext, TestSuiteContext } from "./test_types"
 import { dapParseTest } from "./dap_parse"

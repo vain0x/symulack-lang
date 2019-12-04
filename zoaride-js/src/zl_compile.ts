@@ -1,3 +1,5 @@
+// コンパイル機能
+
 import { Ast, astGen } from "./zl_ast"
 import { redElementNewRoot, redElementToErrors } from "./zl_syntax_red"
 import { ParseError } from "./zl_syntax"
@@ -10,6 +12,9 @@ interface CompilationResult {
     errors: ParseError[],
 }
 
+/**
+ * ソースコードをコンパイルする。
+ */
 export const compile = (sourceCode: string): CompilationResult => {
     const tokens = tokenize(sourceCode)
     const greenRoot = parse(tokens)

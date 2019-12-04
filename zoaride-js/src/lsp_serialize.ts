@@ -1,3 +1,5 @@
+// LSP メッセージの文字列化
+
 import { TextEncoder } from "util"
 
 const encoder = new TextEncoder()

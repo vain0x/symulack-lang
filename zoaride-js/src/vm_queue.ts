@@ -1,5 +1,10 @@
+// バーチャルマシンのメッセージキュー
+
 import { TestSuiteFun } from "./test_types"
 
+/**
+ * バーチャルマシンのメッセージ
+ */
 export type VmMsg =
     | {
         kind: "VM_TERMINATE"

@@ -1,4 +1,4 @@
-// バーチャルマシン (ランタイム) のエントリポイント
+// バーチャルマシン (ランタイム) のエントリーポイント
 
 import * as fs from "fs"
 import { EXIT_FAILURE, ExitError } from "./vm_error"
@@ -10,9 +10,9 @@ import { VmStep } from "./vm_step"
 import { execute } from "./vm_execution"
 
 const vmMain = async (): Promise<never> => {
-    let debugPort = null as number | null
+    let debugPort: number | null = null
 
-    let debugServer = null as VmDebugServer | null
+    let debugServer: VmDebugServer | null = null
 
     let exitCode = EXIT_FAILURE
 

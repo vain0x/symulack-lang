@@ -80,27 +80,29 @@ const printParseResult = (root: GreenNode) => {
     return output
 }
 
+/**
+ * AST をテキストにする。
+ */
 const printAstResult = (ast: Ast) => {
-    // const go = (ast: any): any => {
-    //     let tree = {} as any
-    //     for (const [key, value] of ast) {
-    //         if (key === "red") {
-    //             return false
-    //         }
-    //     }
-    // }
-
-    // const tree = ast
-
+    // RedElement のような再帰的なオブジェクトは JSON にできないので無視されるようにする。
     const replacer = (key: string, value: unknown) => {
         return key !== "red" ? value : undefined
     }
+
     return JSON.stringify(ast, replacer, 2)
 }
 
+/**
+ * スナップショットテストを行う。
+ *
+ * `tests/features/foo.zoaride` のようなファイルをコンパイルして、
+ * その結果をテキストとして吐き出す。
+ * Git の差分が出ないか、あるいは期待した通りの変化が現れれば OK とする。
+ */
 export const zlParseSnapshotTest: TestSuiteFun = ({ test }) => {
     const testsDir = path.join(__dirname, "../tests")
 
+    // tests 直下にあるカテゴリごとのディレクトリを列挙する。
     for (const dirName of fs.readdirSync(testsDir)) {
         const dirPath = path.join(testsDir, dirName)
 
@@ -131,6 +133,7 @@ export const zlParseSnapshotTest: TestSuiteFun = ({ test }) => {
 
                 await promisify(fs.writeFile)(astOutputPath, astOutput)
 
+                // 実行時エラーが起こらなければ OK としておく。
                 ok(true)
             })
         }

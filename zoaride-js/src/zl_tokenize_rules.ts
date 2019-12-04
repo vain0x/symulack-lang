@@ -1,4 +1,4 @@
-// 字句解析の規則を定義する。
+// 字句解析の規則
 
 import {
     charIsAsciiWhitespace,

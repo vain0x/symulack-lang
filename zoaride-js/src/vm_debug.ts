@@ -1,4 +1,4 @@
-// デバッグ機能
+// バーチャルマシンのデバッグ機能
 
 import { Server, createServer } from "net"
 import { EXIT_SUCCESS } from "./vm_error"

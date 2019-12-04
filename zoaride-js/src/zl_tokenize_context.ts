@@ -1,4 +1,4 @@
-// 字句解析の状態管理を定義する。
+// 字句解析の状態管理
 
 import * as assert from "assert"
 import {
