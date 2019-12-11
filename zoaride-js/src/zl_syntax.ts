@@ -138,8 +138,8 @@ export type NodeKind =
 
     // 式
 
-    // // グループ式 (演算子の優先度を決めるためにカッコで囲まれた式)
-    // | "N_GROUP"
+    // グループ式 (演算子の優先度を決めるためにカッコで囲まれた式)
+    | "N_GROUP"
     // // ブロック式 (文を実行してから式を計算する式)
     // | "N_BLOCK"
 
@@ -277,6 +277,7 @@ export type ParseErrorKind =
     // ソースコードが途中で終わっている。(`1 +` など)
     | "PE_UNEXPECTED_EOF"
     | "PE_EXPECTED_EXPR"
+    | "PE_EXPECTED_RIGHT_PAREN"
 
 /**
  * 字句解析・構文解析のエラー

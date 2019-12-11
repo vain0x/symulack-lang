@@ -44,6 +44,24 @@ const parseAtom = (p: ParseContext): GreenNode => {
             p.bump(node)
             return p.endNode(node, "N_NAME")
         }
+        case "T_LEFT_PAREN": {
+            const node = p.startNode()
+            p.bump(node)
+
+            if (tokenIsExprFirst(p.next())) {
+                const body = parseExpr(p)
+                p.attach(node, body)
+            } else {
+                p.attachError(node, "PE_EXPECTED_EXPR")
+            }
+
+            if (p.next() === "T_RIGHT_PAREN") {
+                p.bump(node)
+            } else {
+                p.attachError(node, "PE_EXPECTED_RIGHT_PAREN")
+            }
+            return p.endNode(node, "N_GROUP")
+        }
         default:
             throw new Error("unreachable")
     }
