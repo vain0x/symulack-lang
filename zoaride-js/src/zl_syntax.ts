@@ -10,20 +10,95 @@ import {
 export type TokenKind =
     // ソースコードの終端
     | "T_EOF"
-    // 解釈できない文字
-    | "T_ERROR"
-    // 空白
+    // 改行
+    | "T_EOL"
+    // スペース
     | "T_SPACE"
+    // コメント
+    | "T_COMMENT"
+    // 数値リテラル
+    | "T_NUMBER"
     // 識別子
     | "T_IDENT"
-    // "++"
-    | "T_PLUS_PLUS"
+
+    // カッコ
+
+    // "("
+    | "T_LEFT_PAREN"
+    // ")"
+    | "T_RIGHT_PAREN"
+    // "<"
+    | "T_LEFT_ANGLE"
+    // ">"
+    | "T_RIGHT_ANGLE"
+    // "["
+    | "T_LEFT_BRACKET"
+    // "]"
+    | "T_RIGHT_BRACKET"
+    // "{"
+    | "T_LEFT_BRACE"
+    // "}"
+    | "T_RIGHT_BRACE"
+
+    // 約物類
+    // "+=" のような複数文字の記号は構文解析の段階で連結する。
+
+    // "&"
+    | "T_AND"
+    // "@"
+    | "T_AT"
+    // "\"
+    | "T_BACKSLASH"
+    // "`"
+    | "T_BACKTICK"
+    // "!"
+    | "T_BANG"
+    // ":"
+    | "T_COLON"
+    // ","
+    | "T_COMMA"
+    // "."
+    | "T_DOT"
+    // "$"
+    | "T_DOLLAR"
+    // '"'
+    | "T_DOUBLE_QUOTE"
+    // "^"
+    | "T_HAT"
+    // "="
+    | "T_EQUAL"
+    // "#"
+    | "T_HASH"
+    // "-"
+    | "T_MINUS"
+    // "%"
+    | "T_PERCENT"
+    // "|"
+    | "T_PIPE"
+    // "+"
+    | "T_PLUS"
+    // "?"
+    | "T_QUESTION"
+    // "'"
+    | "T_SINGLE_QUOTE"
+    // ";"
+    | "T_SEMI"
+    // "/"
+    | "T_SLASH"
+    // "*"
+    | "T_STAR"
+    // "~"
+    | "T_TILDE"
+
+    // その他の文字
+    | "T_OTHER"
 
 /**
  * トークン (緑)
  *
  * トークンとはソースコード上で意味のあるまとまりの単語や記号のこと。
- * 緑のトークンはソースコードにおける位置情報を持たない。
+ *
+ * ここではソースコードにおける位置情報を持たないトークンを「緑」と呼んでいる。
  * (「緑」は Red Green Tree に由来する。)
  */
 export interface GreenToken {
@@ -48,10 +123,87 @@ export interface RedToken extends GreenToken {
  * 構文木のノードの種類
  */
 export type NodeKind =
+    // リテラル
+
     // 名前
     | "N_NAME"
-    // インクリメント文 (increment statement)
-    | "N_INC_STMT"
+    // 数値リテラル
+    | "N_NUMBER"
+    // // 文字列リテラル
+    // | "N_STRING"
+    // // 文字列リテラルの文字通りの (エスケープではない) 部分
+    // | "N_VERBATIM"
+    // // 文字列リテラル中のエスケープシーケンス
+    // | "N_ESCAPE"
+
+    // 式
+
+    // // グループ式 (演算子の優先度を決めるためにカッコで囲まれた式)
+    // | "N_GROUP"
+    // // ブロック式 (文を実行してから式を計算する式)
+    // | "N_BLOCK"
+
+    // // 関数呼び出し
+    // | "N_CALL"
+
+    // // プラス
+    // | "N_PLUS"
+    // // マイナス
+    // | "N_MINUS"
+
+    // 加算
+    | "N_ADD"
+    // 減算
+    | "N_SUB"
+    // 乗算
+    | "N_MUL"
+    // 除算
+    | "N_DIV"
+    // 剰余
+    | "N_MOD"
+
+    // // ビットAND
+    // | "N_BIT_AND"
+    // // ビットOR
+    // | "N_BIT_OR"
+    // // ビットXOR
+    // | "N_BIT_XOR"
+
+    // // 論理積
+    // | "N_LOG_AND"
+    // // 論理和
+    // | "N_LOG_OR"
+
+    // // 等しい
+    // | "N_EQ"
+    // // 等しくない
+    // | "N_NE"
+    // // よりも小さい
+    // | "N_LT"
+    // // 小さいか等しい
+    // | "N_LTEQ"
+    // // よりも大きい
+    // | "N_GT"
+    // // 大きいか等しい
+    // | "N_GTEQ"
+
+    // // 代入
+    // | "N_ASSIGN"
+    // | "N_ADD_ASSIGN"
+    // | "N_SUB_ASSIGN"
+    // | "N_MUL_ASSIGN"
+    // | "N_DIV_ASSIGN"
+    // | "N_MOD_ASSIGN"
+    // | "N_AND_ASSIGN"
+    // | "N_OR_ASSIGN"
+    // | "N_XOR_ASSIGN"
+
+    // 文
+
+    | "N_EXPR_STMT"
+
+    // | "N_LET"
+
     // (構文木の根の種類)
     | "N_ROOT"
 
@@ -142,8 +294,38 @@ export interface ParseError {
 }
 
 /**
- * trivial な (重要でない) 種類のトークンか？
+ * 約物の表
  */
-export const tokenIsTrivial = (tokenKind: TokenKind) =>
-    tokenKind === "T_ERROR"
-    || tokenKind === "T_SPACE"
+export const SIGN_TABLE: [TokenKind, string][] = [
+    ["T_LEFT_PAREN", "("],
+    ["T_RIGHT_PAREN", ")"],
+    ["T_LEFT_ANGLE", "<"],
+    ["T_RIGHT_ANGLE", ">"],
+    ["T_LEFT_BRACKET", "["],
+    ["T_RIGHT_BRACKET", "]"],
+    ["T_LEFT_BRACE", "{"],
+    ["T_RIGHT_BRACE", "}"],
+    ["T_AND", "&"],
+    ["T_AT", "@"],
+    ["T_BACKSLASH", "\\"],
+    ["T_BACKTICK", "`"],
+    ["T_BANG", "!"],
+    ["T_COLON", ":"],
+    ["T_COMMA", ","],
+    ["T_DOT", "."],
+    ["T_DOLLAR", "$"],
+    ["T_DOUBLE_QUOTE", "\""],
+    ["T_HAT", "^"],
+    ["T_EQUAL", "="],
+    ["T_HASH", "#"],
+    ["T_MINUS", "-"],
+    ["T_PERCENT", "%"],
+    ["T_PIPE", "|"],
+    ["T_PLUS", "+"],
+    ["T_QUESTION", "?"],
+    ["T_SINGLE_QUOTE", "'"],
+    ["T_SEMI", ";"],
+    ["T_SLASH", "/"],
+    ["T_STAR", "*"],
+    ["T_TILDE", "~"],
+]

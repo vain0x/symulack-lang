@@ -106,13 +106,6 @@ export class TokenizeContext {
     }
 
     /**
-     * 前回のコミット位置より進んでいるか？
-     */
-    public isDirty() {
-        return this.lastIndex !== this.index
-    }
-
-    /**
      * コミットする。
      *
      * 前回のコミット位置から現在位置までの間を1個のトークンとみなす。
@@ -130,7 +123,7 @@ export class TokenizeContext {
      * 字句解析を終了する。
      */
     public finish() {
-        assert.ok(!this.isDirty())
+        assert.equal(this.index, this.lastIndex)
         assert.equal(this.index, this.text.length)
 
         // 末尾に EOF トークンを自動でつける。(構文解析のため)

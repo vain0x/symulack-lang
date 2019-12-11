@@ -1,0 +1,86 @@
+START(N_ROOT)
+  START(N_EXPR_STMT)
+    START(N_ADD)
+      START(N_NUMBER)
+        TOKEN(T_COMMENT) "// add"
+        TOKEN(T_EOL) "\n"
+        TOKEN(T_NUMBER) "2"
+        TOKEN(T_SPACE) " "
+      END(N_NUMBER)
+      TOKEN(T_PLUS) "+"
+      TOKEN(T_SPACE) " "
+      START(N_NUMBER)
+        TOKEN(T_NUMBER) "3"
+      END(N_NUMBER)
+    END(N_ADD)
+  END(N_EXPR_STMT)
+  START(N_EXPR_STMT)
+    START(N_SUB)
+      START(N_NUMBER)
+        TOKEN(T_EOL) "\n"
+        TOKEN(T_EOL) "\n"
+        TOKEN(T_COMMENT) "// sub"
+        TOKEN(T_EOL) "\n"
+        TOKEN(T_NUMBER) "2"
+        TOKEN(T_SPACE) " "
+      END(N_NUMBER)
+      TOKEN(T_MINUS) "-"
+      TOKEN(T_SPACE) " "
+      START(N_NUMBER)
+        TOKEN(T_NUMBER) "3"
+      END(N_NUMBER)
+    END(N_SUB)
+  END(N_EXPR_STMT)
+  START(N_EXPR_STMT)
+    START(N_SUB)
+      START(N_ADD)
+        START(N_MUL)
+          START(N_NUMBER)
+            TOKEN(T_EOL) "\n"
+            TOKEN(T_EOL) "\n"
+            TOKEN(T_COMMENT) "// complex"
+            TOKEN(T_EOL) "\n"
+            TOKEN(T_NUMBER) "2"
+            TOKEN(T_SPACE) " "
+          END(N_NUMBER)
+          TOKEN(T_STAR) "*"
+          TOKEN(T_SPACE) " "
+          START(N_NUMBER)
+            TOKEN(T_NUMBER) "3"
+            TOKEN(T_SPACE) " "
+          END(N_NUMBER)
+        END(N_MUL)
+        TOKEN(T_PLUS) "+"
+        TOKEN(T_SPACE) " "
+        START(N_DIV)
+          START(N_NUMBER)
+            TOKEN(T_NUMBER) "4"
+            TOKEN(T_SPACE) " "
+          END(N_NUMBER)
+          TOKEN(T_SLASH) "/"
+          TOKEN(T_SPACE) " "
+          START(N_NUMBER)
+            TOKEN(T_NUMBER) "5"
+            TOKEN(T_SPACE) " "
+          END(N_NUMBER)
+        END(N_DIV)
+      END(N_ADD)
+      TOKEN(T_MINUS) "-"
+      TOKEN(T_SPACE) " "
+      START(N_MOD)
+        START(N_NUMBER)
+          TOKEN(T_NUMBER) "6"
+          TOKEN(T_SPACE) " "
+        END(N_NUMBER)
+        TOKEN(T_PERCENT) "%"
+        TOKEN(T_SPACE) " "
+        START(N_NUMBER)
+          TOKEN(T_NUMBER) "7"
+          TOKEN(T_SPACE) " "
+          TOKEN(T_COMMENT) "//= ?"
+        END(N_NUMBER)
+      END(N_MOD)
+    END(N_SUB)
+  END(N_EXPR_STMT)
+  TOKEN(T_EOL) "\n"
+END(N_ROOT)

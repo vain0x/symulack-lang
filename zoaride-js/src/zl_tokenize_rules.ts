@@ -1,24 +1,65 @@
 // 字句解析の規則
 
 import {
-    charIsAsciiWhitespace,
-    charIsError,
     charIsIdent,
     charIsIdentFirst,
+    charIsNumeric,
+    charIsOther,
+    charIsSpace,
 } from "./zl_tokenize_chars"
+import { SIGN_TABLE } from "./zl_syntax"
 import { TokenizeContext } from "./zl_tokenize_context"
+
+/**
+ * 改行を字句解析する。
+ */
+const tokenizeEol = (t: TokenizeContext) => {
+    if (t.eat("\n")) {
+        t.commit("T_EOL")
+    }
+}
 
 /**
  * スペースを字句解析する。
  */
 const tokenizeSpace = (t: TokenizeContext) => {
-    while (charIsAsciiWhitespace(t.next())) {
+    if (!charIsSpace(t.next())) {
+        return
+    }
+
+    while (charIsSpace(t.next())) {
         t.bump()
     }
 
-    if (t.isDirty()) {
-        t.commit("T_SPACE")
+    t.commit("T_SPACE")
+}
+
+/**
+ * コメントを字句解析する。
+ */
+const tokenizeComment = (t: TokenizeContext) => {
+    if (t.eat("//")) {
+        while (!t.atEof() && t.next() !== "\n") {
+            t.bump()
+        }
+
+        t.commit("T_COMMENT")
     }
+}
+
+/**
+ * 数値リテラルを字句解析する。
+ */
+const tokenizeNumber = (t: TokenizeContext) => {
+    if (!charIsNumeric(t.next())) {
+        return
+    }
+
+    while (charIsNumeric(t.next())) {
+        t.bump()
+    }
+
+    t.commit("T_NUMBER")
 }
 
 /**
@@ -33,31 +74,33 @@ const tokenizeIdent = (t: TokenizeContext) => {
         t.bump()
     }
 
-    if (t.isDirty()) {
-        t.commit("T_IDENT")
-    }
+    t.commit("T_IDENT")
 }
 
 /**
- * 約物 (記号) を字句解析する。
+ * 約物を字句解析する。
  */
-const tokenizePun = (t: TokenizeContext) => {
-    if (t.eat("++")) {
-        t.commit("T_PLUS_PLUS")
+const tokenizeSign = (t: TokenizeContext) => {
+    for (const [kind, word] of SIGN_TABLE) {
+        if (t.eat(word)) {
+            t.commit(kind)
+        }
     }
 }
 
 /**
  * 解釈できない文字を字句解析する。
  */
-const tokenizeError = (t: TokenizeContext) => {
-    while (!t.atEof() && charIsError(t.next())) {
+const tokenizeOther = (t: TokenizeContext) => {
+    if (t.atEof() || !charIsOther(t.next())) {
+        return
+    }
+
+    while (!t.atEof() && charIsOther(t.next())) {
         t.bump()
     }
 
-    if (t.isDirty()) {
-        t.commit("T_ERROR")
-    }
+    t.commit("T_OTHER")
 }
 
 /**
@@ -69,10 +112,13 @@ export const tokenizeAll = (text: string) => {
     while (!t.atEof()) {
         const startIndex = t.currentIndex()
 
+        tokenizeEol(t)
         tokenizeSpace(t)
+        tokenizeComment(t)
+        tokenizeNumber(t)
         tokenizeIdent(t)
-        tokenizePun(t)
-        tokenizeError(t)
+        tokenizeSign(t)
+        tokenizeOther(t)
 
         if (t.currentIndex() === startIndex) {
             throw new Error("字句解析が無限ループしました。")

@@ -8,7 +8,15 @@ import { ParseContext } from "./zl_parse_context"
  * 原子式の最初のトークンとしてありえるか？
  */
 const tokenIsAtomFirst = (t: TokenKind) =>
-    t === "T_IDENT"
+    t === "T_NUMBER"
+    || t === "T_IDENT"
+    || t === "T_LEFT_PAREN"
+
+/**
+ * 式の最初のトークンとしてありえるか？
+ */
+const tokenIsExprFirst = (t: TokenKind) =>
+    tokenIsAtomFirst(t)
 
 /**
  * 文の最初のトークンとしてありえるか？
@@ -26,6 +34,11 @@ const parseAtom = (p: ParseContext): GreenNode => {
     assert.ok(tokenIsAtomFirst(p.next()))
 
     switch (p.next()) {
+        case "T_NUMBER": {
+            const node = p.startNode()
+            p.bump(node)
+            return p.endNode(node, "N_NUMBER")
+        }
         case "T_IDENT": {
             const node = p.startNode()
             p.bump(node)
@@ -36,23 +49,126 @@ const parseAtom = (p: ParseContext): GreenNode => {
     }
 }
 
+const parseMul = (p: ParseContext) :GreenNode => {
+    assert.ok(tokenIsExprFirst(p.next()))
+
+    let left = parseAtom(p)
+
+    while (true) {
+        if (p.next() === "T_STAR") {
+            const node = p.startBefore(left)
+
+            p.bump(node)
+
+            if (tokenIsAtomFirst(p.next())) {
+                const right = parseAtom(p)
+                p.attach(node, right)
+            } else {
+                p.attachError(node, "PE_EXPECTED_EXPR")
+            }
+
+            left = p.endNode(node, "N_MUL")
+            continue
+        }
+
+        if (p.next() === "T_SLASH") {
+            const node = p.startBefore(left)
+
+            p.bump(node)
+
+            if (tokenIsAtomFirst(p.next())) {
+                const right = parseAtom(p)
+                p.attach(node, right)
+            } else {
+                p.attachError(node, "PE_EXPECTED_EXPR")
+            }
+
+            left = p.endNode(node, "N_DIV")
+            continue
+        }
+
+        if (p.next() === "T_PERCENT") {
+            const node = p.startBefore(left)
+
+            p.bump(node)
+
+            if (tokenIsAtomFirst(p.next())) {
+                const right = parseAtom(p)
+                p.attach(node, right)
+            } else {
+                p.attachError(node, "PE_EXPECTED_EXPR")
+            }
+
+            left = p.endNode(node, "N_MOD")
+            continue
+        }
+
+        break
+    }
+
+    return left
+}
+
+const parseAdd = (p: ParseContext): GreenNode => {
+    let left = parseMul(p)
+
+    while (true) {
+        if (p.next() === "T_PLUS") {
+            const node = p.startBefore(left)
+
+            p.bump(node)
+
+            if (tokenIsExprFirst(p.next())) {
+                const right = parseMul(p)
+                p.attach(node, right)
+            } else {
+                p.attachError(node, "PE_EXPECTED_EXPR")
+            }
+
+            left = p.endNode(node, "N_ADD")
+            continue
+        }
+
+        if (p.next() === "T_MINUS") {
+            const node = p.startBefore(left)
+
+            p.bump(node)
+
+            if (tokenIsExprFirst(p.next())) {
+                const right = parseMul(p)
+                p.attach(node, right)
+            } else {
+                p.attachError(node, "PE_EXPECTED_EXPR")
+            }
+
+            left = p.endNode(node, "N_SUB")
+            continue
+        }
+
+        break
+    }
+
+    return left
+}
+
+/**
+ * 式をパースする。
+ */
+const parseExpr = (p: ParseContext): GreenNode => {
+    assert.ok(tokenIsExprFirst(p.next()))
+    return parseAdd(p)
+}
+
 /**
  * 文をパースする。
  */
 const parseStmt = (p: ParseContext): GreenNode => {
     assert.ok(tokenIsStmtFirst(p.next()))
 
-    const atom = parseAtom(p)
-
-    // インクリメント文
-    if (p.next() === "T_PLUS_PLUS") {
-        const node = p.startBefore(atom)
-        p.bump(node)
-        return p.endNode(node, "N_INC_STMT")
-    }
-
     // 式文
-    return atom
+    const expr = parseExpr(p)
+    const node = p.startBefore(expr)
+    return p.endNode(node, "N_EXPR_STMT")
 }
 
 /**

@@ -27,13 +27,14 @@ export type Ast =
  * 式とみなせるノードか？
  */
 const nodeIsExpr = (kind: NodeKind) =>
-    kind === "N_NAME"
+    kind === "N_NUMBER"
+    || kind === "N_NAME"
 
 /**
  * 文とみなせるノードか？
  */
 const nodeIsStmt = (kind: NodeKind) =>
-    kind === "N_INC_STMT"
+    kind === "N_EXPR_STMT"
 
 // -----------------------------------------------
 // RedElement のヘルパー関数
@@ -103,7 +104,7 @@ const genStmt = (element: RedElement | null): Ast | null => {
     }
 
     switch (element.green.node.kind) {
-        case "N_INC_STMT": {
+        case "N_EXPR_STMT": {
             const left = genExpr(arrayFirst(toChildExprs(element)))
 
             return {
@@ -121,14 +122,21 @@ const genStmt = (element: RedElement | null): Ast | null => {
  * 構文木から AST を生成する。
  */
 export const astGen = (element: RedElement): Ast => {
-    if (element.green.kind !== "L_NODE" || element.green.node.kind != "N_ROOT") {
-        throw new Error("not root")
-    }
-
-    const children = arrayFilterMap(toChildStmts(element), genStmt)
+    // FIXME: unimpl
     return {
         kind: "A_SEMI",
-        children,
+        children: [],
         red: element,
     }
+
+    // if (element.green.kind !== "L_NODE" || element.green.node.kind != "N_ROOT") {
+    //     throw new Error("not root")
+    // }
+
+    // const children = arrayFilterMap(toChildStmts(element), genStmt)
+    // return {
+    //     kind: "A_SEMI",
+    //     children,
+    //     red: element,
+    // }
 }

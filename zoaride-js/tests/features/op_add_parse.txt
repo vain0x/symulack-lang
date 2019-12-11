@@ -1,0 +1,16 @@
+START(N_ROOT)
+  START(N_EXPR_STMT)
+    START(N_ADD)
+      START(N_NUMBER)
+        TOKEN(T_NUMBER) "2"
+        TOKEN(T_SPACE) " "
+      END(N_NUMBER)
+      TOKEN(T_PLUS) "+"
+      TOKEN(T_SPACE) " "
+      START(N_NUMBER)
+        TOKEN(T_NUMBER) "3"
+      END(N_NUMBER)
+    END(N_ADD)
+  END(N_EXPR_STMT)
+  TOKEN(T_EOL) "\n"
+END(N_ROOT)

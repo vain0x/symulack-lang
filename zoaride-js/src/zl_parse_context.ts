@@ -6,8 +6,8 @@ import {
     GreenToken,
     NodeKind,
     ParseErrorKind,
-    tokenIsTrivial,
 } from "./zl_syntax"
+import { createNonTriviaIndexes, tokenIsTrailingTrivia, tokenIsTrivia } from "./zl_syntax_trivia"
 
 /**
  * トークンリスト上の位置
@@ -28,11 +28,20 @@ export class ParseContext {
      */
     private index: TokenIndex = 0
 
+    /**
+     * トリビアを飛ばして先読みするための索引
+     *
+     * nonTriviaIndexes[i] は、トークン列上の位置 i 以降にある
+     * 最初のトリビアでないトークンの位置を指す。
+     */
+    private nonTriviaIndexes: TokenIndex[]
+
     public constructor(tokens: GreenToken[]) {
         assert.ok(tokens.length >= 1)
         assert.equal(tokens[tokens.length - 1].kind, "T_EOF")
 
         this.tokens = tokens
+        this.nonTriviaIndexes = createNonTriviaIndexes(tokens)
     }
 
     /**
@@ -55,11 +64,11 @@ export class ParseContext {
      * 次のトークンの種類
      */
     public next() {
-        return this.tokens[this.index].kind
+        return this.tokens[this.nonTriviaIndexes[this.index]].kind
     }
 
     /**
-     * 次の1トークン (trivial なものも含む) を読み飛ばす。
+     * 次のトリビアまたはトークンを読み飛ばす。
      */
     private doBump(node: GreenNode) {
         assert.ok(this.index + 1 < this.tokens.length)
@@ -73,42 +82,42 @@ export class ParseContext {
         this.index++
 
         // 字句解析のエラーを構文解析が引き継ぐ。
-        if (kind === "T_ERROR") {
+        if (kind === "T_OTHER") {
             this.attachError(node, "PE_INVALID_CHAR")
         }
     }
 
     /**
-     * trivial なトークンを読み飛ばす。
+     * トークンの前についているトリビアを読み飛ばす。
      */
-    private bumpTrivial(node: GreenNode) {
-        while (tokenIsTrivial(this.next())) {
+    private bumpLeadingTrivia(node: GreenNode) {
+        while (tokenIsTrivia(this.tokens[this.index].kind)) {
+            this.doBump(node)
+        }
+    }
+
+    /**
+     * トークンの後ろについているトリビアを読み飛ばす。
+     */
+    private bumpTrailingTrivia(node: GreenNode) {
+        while (tokenIsTrailingTrivia(this.tokens[this.index].kind)) {
             this.doBump(node)
         }
     }
 
     /**
      * 次のトークンを読み飛ばす。
+     *
+     * そのトークンの周囲のトリビアも一緒に読み飛ばす。
      */
     public bump(node: GreenNode) {
         assert.ok(this.index + 1 < this.tokens.length)
 
+        this.bumpLeadingTrivia(node)
         this.doBump(node)
-        this.bumpTrivial(node)
+        this.bumpTrailingTrivia(node)
 
         this.assertInvariants()
-    }
-
-    /**
-     * 指定された数のトークンを読み飛ばす。
-     */
-    public bumpMany(node: GreenNode, count: number) {
-        assert.ok(count >= 0)
-        assert.ok(this.index + count < this.tokens.length)
-
-        for (let i = 0; i < count; i++) {
-            this.bump(node)
-        }
     }
 
     /**
@@ -145,14 +154,15 @@ export class ParseContext {
     public startRoot(): GreenNode {
         assert.equal(this.index, 0)
 
-        const node = this.startNode()
-        this.bumpTrivial(node)
-
-        return node
+        return this.startNode()
     }
 
+    /**
+     * ノードの構築を終了する。
+     */
     public endNode(node: GreenNode, nodeKind: NodeKind) {
         assert.equal(node.kind, "N_ROOT")
+
         node.kind = nodeKind
         return node
     }
@@ -181,6 +191,8 @@ export class ParseContext {
      * 構文解析の終了時に呼ばれる。
      */
     public finish(root: GreenNode): GreenNode {
+        this.bumpLeadingTrivia(root)
+
         assert.equal(this.index, this.tokens.length - 1)
         return root
     }

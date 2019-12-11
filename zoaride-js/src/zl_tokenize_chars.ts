@@ -4,46 +4,80 @@
 type Char = string
 
 /**
- * 文字が ASCII 文字の空白か？
+ * 文字が改行でない空白か？
  */
-export const charIsAsciiWhitespace = (char: Char) =>
-    char === " " || char === "\t" || char === "\r" || char === "\n"
+export const charIsSpace = (char: Char) =>
+    char === " " || char === "\t" || char === "\r"
 
 /**
- * 文字が ASCII 文字の10進数の数字か？
+ * 文字が数字か？
  */
-export const charIsAsciiNumeric = (char: Char) =>
+export const charIsNumeric = (char: Char) =>
     "0" <= char && char <= "9"
 
 /**
- * 文字が ASCII 文字のアルファベットか？
+ * 文字がアルファベットか？
  */
-export const charIsAsciiAlphabetic = (char: Char) =>
+export const charIsAlphabetic = (char: Char) =>
     ("A" <= char && char <= "Z") || ("a" <= char && char <= "z")
 
 /**
  * 文字が識別子に含まれうる文字か？
  */
 export const charIsIdent = (char: Char) =>
-    charIsAsciiAlphabetic(char) || charIsAsciiNumeric(char) || char === "_"
+    charIsAlphabetic(char)
+    || charIsNumeric(char)
+    || char === "_"
 
 /**
  * 文字が識別子の先頭としてありうる文字か？
  */
 export const charIsIdentFirst = (char: Char) =>
-    charIsIdent(char) && !charIsAsciiNumeric(char)
+    charIsIdent(char) && !charIsNumeric(char)
 
 /**
  * 約物の先頭としてありうる文字か？
  */
 export const charIsPunFirst = (char: Char) =>
-    char === "+"
+    char === "("
+    || char === ")"
+    || char === "<"
+    || char === ">"
+    || char === "["
+    || char === "]"
+    || char === "{"
+    || char === "}"
+    || char === "&"
+    || char === "@"
+    || char === "\\"
+    || char === "`"
+    || char === "!"
+    || char === ":"
+    || char === ","
+    || char === "."
+    || char === "$"
+    || char === "\""
+    || char === "^"
+    || char === "="
+    || char === "#"
+    || char === "-"
+    || char === "%"
+    || char === "|"
+    || char === "+"
+    || char === "?"
+    || char === "'"
+    || char === ";"
+    || char === "/"
+    || char === "*"
+    || char === "~"
+
 
 /**
  * どのトークンの先頭にもならない文字か？
  */
-export const charIsError = (char: Char) =>
-    !charIsAsciiWhitespace(char)
-    && !charIsAsciiNumeric(char)
+export const charIsOther = (char: Char) =>
+    !charIsSpace(char)
+    && char !== "\n"
+    && !charIsNumeric(char)
     && !charIsIdentFirst(char)
     && !charIsPunFirst(char)
