@@ -28,7 +28,7 @@ export class TokenizeContext {
     private lastIndex: number = 0
 
     /**
-     * `this.lastIndexP までのソースコードを字句解析して得られたトークンのリスト
+     * `this.lastIndex` までのソースコードを字句解析して得られたトークンのリスト
      */
     private tokens: GreenToken[] = []
 
